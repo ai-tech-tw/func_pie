@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, overload
 
 Number = Union[int, float]
 
@@ -18,13 +18,17 @@ class Calculation:
     def __init__(self, initial: Optional[Number] = None):
         self.exec_code: List[str] = ["+", "-", "*", "/", "**", "//", "%"]
         self._current_value: Optional[float] = float(initial) if initial is not None else None
-        self.exec: Dict[str, Callable[[Number, Number], Number]] = {}
+        self.exec: Dict[str, Any] = {}
 
     @property
     def value(self) -> Optional[float]:
         """Current accumulated value if using fluent chaining."""
         return self._current_value
 
+    @overload
+    def add(self, num: Number, add: None = None) -> Calculation: ...
+    @overload
+    def add(self, num: Number, add: Number) -> Number: ...
     def add(self, num: Number, add: Optional[Number] = None) -> Union[Number, Calculation]:
         """Add two numbers, or add to the accumulated value if chained."""
         if add is None and self._current_value is not None:
@@ -36,6 +40,10 @@ class Calculation:
         self._current_value = float(res)
         return res
 
+    @overload
+    def sub(self, num: Number, sub: None = None) -> Calculation: ...
+    @overload
+    def sub(self, num: Number, sub: Number) -> Number: ...
     def sub(self, num: Number, sub: Optional[Number] = None) -> Union[Number, Calculation]:
         """Subtract sub from num, or subtract from accumulated value."""
         if sub is None and self._current_value is not None:
@@ -47,6 +55,10 @@ class Calculation:
         self._current_value = float(res)
         return res
 
+    @overload
+    def mul(self, num: Number, mul: None = None) -> Calculation: ...
+    @overload
+    def mul(self, num: Number, mul: Number) -> Number: ...
     def mul(self, num: Number, mul: Optional[Number] = None) -> Union[Number, Calculation]:
         """Multiply two numbers, or multiply accumulated value."""
         if mul is None and self._current_value is not None:
@@ -58,6 +70,10 @@ class Calculation:
         self._current_value = float(res)
         return res
 
+    @overload
+    def div(self, num: Number, div: None = None) -> Calculation: ...
+    @overload
+    def div(self, num: Number, div: Number) -> float: ...
     def div(self, num: Number, div: Optional[Number] = None) -> Union[float, Calculation]:
         """Divide num by div, or divide accumulated value.
 
@@ -77,6 +93,10 @@ class Calculation:
         self._current_value = float(res)
         return res
 
+    @overload
+    def pow(self, num: Number, exp: None = None) -> Calculation: ...
+    @overload
+    def pow(self, num: Number, exp: Number) -> Number: ...
     def pow(self, num: Number, exp: Optional[Number] = None) -> Union[Number, Calculation]:
         """Raise num to exp, or raise accumulated value."""
         if exp is None and self._current_value is not None:
@@ -88,6 +108,10 @@ class Calculation:
         self._current_value = float(res)
         return res
 
+    @overload
+    def mod(self, num: Number, mod: None = None) -> Calculation: ...
+    @overload
+    def mod(self, num: Number, mod: Number) -> Number: ...
     def mod(self, num: Number, mod: Optional[Number] = None) -> Union[Number, Calculation]:
         """Modulo operation."""
         modulo = mod if mod is not None else num
@@ -103,6 +127,10 @@ class Calculation:
         self._current_value = float(res)
         return res
 
+    @overload
+    def floordiv(self, num: Number, div: None = None) -> Calculation: ...
+    @overload
+    def floordiv(self, num: Number, div: Number) -> Number: ...
     def floordiv(self, num: Number, div: Optional[Number] = None) -> Union[Number, Calculation]:
         """Integer floor division."""
         divisor = div if div is not None else num
@@ -118,7 +146,7 @@ class Calculation:
         self._current_value = float(res)
         return res
 
-    def usage(self) -> Tuple[Dict[str, Callable[[Number, Number], Number]], List[str]]:
+    def usage(self) -> Tuple[Dict[str, Any], List[str]]:
         """Return dictionary mapping operator strings to methods and the list of codes."""
         self.exec = {
             self.exec_code[0]: self.add,

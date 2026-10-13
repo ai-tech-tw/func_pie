@@ -36,8 +36,22 @@ keywords = ["mathematics", "physics", "calculus", "linear-algebra", "statistics"
 "Homepage" = "https://github.com/ai-tech-tw/func_pie"
 "Bug Tracker" = "https://github.com/ai-tech-tw/func_pie/issues"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "basedpyright>=1.34.0",
+    "flake8>=5.0.0",
+    "build>=0.10.0",
+    "twine>=4.0.0",
+]
+
 [tool.setuptools.packages.find]
 include = ["funcpie*", "func_pie*", "libs*"]
 
 [tool.setuptools.package-data]
 funcpie = ["py.typed"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+

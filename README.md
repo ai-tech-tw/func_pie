@@ -1,42 +1,52 @@
 # FuncPie
 
+[正體中文](README.zh-TW.md) | English
+
 [![CI](https://github.com/ai-tech-tw/func_pie/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-tech-tw/func_pie/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Type Checked](https://img.shields.io/badge/mypy-checked-blue)](https://mypy.readthedocs.io/)
+[![Type Checked](https://img.shields.io/badge/basedpyright-checked-blue)](https://github.com/DetachHead/basedpyright)
 
-FuncPie 是專為 Python 設計的輕量、全功能數學與物理計算函式庫（Mathematic and Physical Functions Library for Python）。  
-零第三方外部依賴（Pure Python Standard Library），開箱即用、完全型別標註（Type-Annotated），並提供流式函數管道（Functional Pipelines）。
+> A lightweight, comprehensive mathematics and physical functions library designed for Python.
 
----
-
-## 核心特色 (Key Features)
-
-- **零外部依賴 (Zero Dependencies)**：僅依賴 Python 原生標準庫，極致輕量、隨裝即用，跨平台一致。
-- **全面數學模組 (Comprehensive Mathematics)**：
-  - **基礎運算 (Basic & Chaining)**：Calculation 鏈式與累加計算、安全運算。
-  - **代數與數論 (Algebra & Number Theory)**：多項式微積分與求根、GCD/LCM、質數篩法、質因數分解、排列組合。
-  - **微積分與數值分析 (Calculus & Numerical)**：數值微分 (前向/後向/中心差分)、高精度數值積分 (辛普森法/梯形法)、牛頓法與二分法求根、多元梯度。
-  - **線性代數 (Linear Algebra)**：2D/3D 幾何向量、矩陣乘法、行列式、高斯消去求逆、線性方程組求解 ($Ax = b$)。
-  - **統計與機率 (Statistics & Probability)**：敘述統計、百分位數、四分位數、偏度、峰度、皮爾森相關係數、最小平方法線性迴歸、常態/二項/卜瓦松分布。
-  - **幾何與座標轉換 (Geometry & Coordinates)**：多邊形鞋帶公式面積、2D/3D 立體幾何、極座標/球座標/柱座標轉換。
-  - **特殊函數與激活函數 (Special & Activations)**：Gamma、Beta、Erf、Sigmoid、ReLU、Leaky ReLU、Softmax。
-- **完整物理模組 (Full Physics Suite)**：
-  - **精確物理常數 (CODATA Constants)**：光速 $c$、萬有引力常數 $G$、普朗克常數 $h$、波茲曼常數 $k_B$ 等。
-  - **古典力學 (Classical Mechanics)**：運動學方程式、拋體軌跡計算、萬有引力、宇宙逃逸速度、動能/功/動量、彈性/非彈性碰撞、單擺與彈簧諧振。
-  - **熱力學 (Thermodynamics)**：理想氣體方程式 ($PV=nRT$)、熱傳導、熱膨脹、卡諾循環效率、斯特凡-波茲曼黑體輻射、維恩位移定律。
-  - **電磁學與電路 (Electromagnetism & Circuits)**：庫侖定律、歐姆定律、電阻/電容串並聯、RC 電路充放電時態、勞侖茲力、螺線管磁場。
-  - **波動與光學 (Waves & Optics)**：聲速溫變、都卜勒效應、司乃耳定律、全反射臨界角、薄透鏡成像方程式、分貝聲強級。
-  - **近代物理 (Modern & Quantum Physics)**：狹義相對論勞侖茲因子 $\gamma$、時間膨脹、長度收縮、質能等價 ($E=mc^2$)、光子能量、物質波波長、放射性衰變期。
-  - **單位轉換器 (Unit Converter)**：長度、質量、時間、壓力、能量、速度、角度與溫標換算。
-- **流式函數管道 (Functional Pipelines)**：支援 Unix 風格的 `value | f | g` 管道與 `pipe()`, `compose()`, `curry()`。
-- **向後相容 (Backward Compatible)**：完全相容原先 `libs.math.basic.Calculation` 與 `func_pie` 引用。
+FuncPie is built with **zero external dependencies (Pure Python Standard Library)**, fully type-annotated, ready out-of-the-box, and natively supports elegant Unix-style functional pipelines.
 
 ---
 
-## 安裝 (Installation)
+## Key Features
 
-### 開發者安裝 (Editable Mode)
+- **Zero External Dependencies**: Pure Python standard library implementation with zero third-party packages. Extremely lightweight, instant installation, and consistent across platforms.
+- **Comprehensive Mathematics Suite**:
+  - **Basic Arithmetic & Chaining**: `Calculation` class with method chaining, running accumulations, and safe division/modulo operations.
+  - **Algebra & Number Theory**: Polynomial evaluation, calculus, and root finding; GCD, LCM, prime sieving, prime factorization, combinations, and permutations.
+  - **Calculus & Numerical Methods**: Numerical differentiation (forward, backward, central differences), numerical integration (Simpson's rule, trapezoidal rule), root finding (Newton-Raphson, bisection), and multivariable gradient computation.
+  - **Linear Algebra**: 2D and 3D vectors with geometric operations, matrix arithmetic, determinants, Gaussian elimination, matrix inversion, and linear system solving ($Ax = b$).
+  - **Statistics & Probability**: Descriptive statistics (mean, variance, standard deviation, percentiles, quartiles, skewness, kurtosis), Pearson correlation, least-squares linear regression, and common distributions (Normal, Binomial, Poisson).
+  - **Geometry & Coordinates**: Polygon area via Shoelace formula, perimeter, volume, surface area of 2D/3D shapes, and coordinate transformations (polar, spherical, cylindrical).
+  - **Special & Activation Functions**: Gamma, Beta, Error function ($\text{erf}$), and machine learning activations (Sigmoid, ReLU, Leaky ReLU, Softmax).
+- **Full Physics Suite**:
+  - **CODATA Physical Constants**: Accurate scientific constants ($c$, $G$, $h$, $\hbar$, $k_B$, $e$, $m_e$, etc.).
+  - **Classical Mechanics**: Kinematics equations, projectile trajectory simulation, Newton's law of universal gravitation, escape velocity, kinetic energy, work, momentum, elastic/inelastic collisions, simple pendulum, and harmonic oscillators.
+  - **Thermodynamics**: Ideal gas law ($PV=nRT$), thermal conduction, thermal expansion, Carnot cycle efficiency, Stefan-Boltzmann blackbody radiation, and Wien's displacement law.
+  - **Electromagnetism & Circuits**: Coulomb's law, Ohm's law, series/parallel equivalent resistance and capacitance, RC circuit charging/discharging transients, Lorentz force, and solenoid magnetic fields.
+  - **Waves & Optics**: Temperature-dependent speed of sound, Doppler effect, Snell's law, total internal reflection critical angle, thin-lens equation, and decibel sound level conversions.
+  - **Modern & Quantum Physics**: Special relativity Lorentz factor ($\gamma$), time dilation, length contraction, mass-energy equivalence ($E=mc^2$), photon energy, de Broglie matter wavelength, and radioactive half-life decay.
+  - **Unit Converter**: Conversions across length, mass, time, pressure, energy, velocity, angle, and temperature scales.
+- **Functional Pipelines**: Native support for Unix-style pipelining syntax `value | f | g`, along with functional utilities `pipe()`, `compose()`, and `curry()`.
+- **Backward Compatible**: 100% backward compatible with legacy imports such as `libs.math.basic.Calculation` and `func_pie`.
+
+---
+
+## Installation
+
+### Standard Installation (from source)
+```bash
+git clone https://github.com/ai-tech-tw/func_pie.git
+cd func_pie
+pip install .
+```
+
+### Developer Mode (Editable)
 ```bash
 git clone https://github.com/ai-tech-tw/func_pie.git
 cd func_pie
@@ -45,19 +55,19 @@ pip install -e .
 
 ---
 
-## 快速上手 (Quickstart)
+## Quickstart
 
-### 1. 基礎計算與鏈式運算 (Calculation & Pipelines)
+### 1. Basic Arithmetic & Functional Pipelines
 ```python
 from funcpie import Calculation
 from funcpie.core import pipeable
 
-# 支援傳統介面與鏈式調用
+# Method chaining with Calculation
 calc = Calculation(10)
 calc.add(15).mul(2).sub(10).div(2)
 print(calc.value)  # ((10 + 15) * 2 - 10) / 2 = 20.0
 
-# Unix 管道運算風格
+# Unix-style pipe operations
 @pipeable
 def add_ten(x):
     return x + 10
@@ -70,69 +80,69 @@ result = 5 | add_ten | square
 print(result)  # (5 + 10)^2 = 225
 ```
 
-### 2. 向量與線性代數 (Linear Algebra)
+### 2. Vectors & Linear Algebra
 ```python
 from funcpie.math import Vector2D, Matrix
 
-# 2D 向量
+# 2D Vector operations
 v1 = Vector2D(3, 4)
 v2 = Vector2D(1, 2)
-print(v1.magnitude)   # 5.0
-print(v1.dot(v2))       # 11.0
+print(v1.magnitude)  # 5.0
+print(v1.dot(v2))    # 11.0
 
-# 矩陣與聯立方程式求解
-# 2x +  y = 4
-#  x + 3y = 7
+# Matrix operations and solving linear systems:
+#  2x +  y = 4
+#   x + 3y = 7
 A = Matrix([[2, 1], [1, 3]])
 x = A.solve([4, 7])
 print(x)  # [1.0, 2.0]
 ```
 
-### 3. 微積分與數值分析 (Calculus)
+### 3. Calculus & Numerical Analysis
 ```python
 from funcpie.math import derivative, integrate, find_root_newton
 
-# 數值微分：f(x) = x^3 在 x = 2 的導數
-df = derivative(lambda x: x ** 3, 2.0)  # 約 12.0
+# Numerical differentiation: derivative of f(x) = x^3 at x = 2
+df = derivative(lambda x: x ** 3, 2.0)  # ~ 12.0
 
-# 數值積分：f(x) = x^2 在 [0, 3] 的定積分
+# Numerical integration: definite integral of f(x) = x^2 from 0 to 3
 area = integrate(lambda x: x ** 2, 0.0, 3.0)  # 9.0
 
-# 牛頓法求根：x^2 - 4 = 0
+# Newton-Raphson root finding: solve x^2 - 4 = 0
 root = find_root_newton(lambda x: x ** 2 - 4.0, x0=3.0)  # 2.0
 ```
 
-### 4. 古典力學與拋體模擬 (Mechanics)
+### 4. Classical Mechanics & Projectile Motion
 ```python
 from funcpie.physics import mechanics
 
-# 拋體運動分析 (初速 50 m/s，發射角 45 度)
+# Projectile motion simulation (initial velocity 50 m/s, launch angle 45 deg)
 summary = mechanics.projectile_motion(v0=50.0, angle_deg=45.0)
-print(f"最大飛行高度: {summary.max_height:.2f} m")
-print(f"總滯空時間:   {summary.flight_time:.2f} s")
-print(f"水平射程:     {summary.horizontal_range:.2f} m")
+print(f"Max Height:        {summary.max_height:.2f} m")
+print(f"Total Flight Time: {summary.flight_time:.2f} s")
+print(f"Horizontal Range:  {summary.horizontal_range:.2f} m")
 
-# 地球逃逸速度
+# Earth escape velocity
 v_esc = mechanics.escape_velocity(mass=5.972e24, radius=6.371e6)
-print(f"地球逃逸速度: {v_esc / 1000.0:.2f} km/s")
+print(f"Escape Velocity:   {v_esc / 1000.0:.2f} km/s")
 ```
 
-### 5. 近代物理與相對論 (Modern Physics)
+### 5. Modern Physics & Relativity
 ```python
 from funcpie.physics import constants, modern
 
-# 0.8 倍光速下的勞侖茲因子與時間膨脹
+# Lorentz factor and time dilation at 0.8c
 v = 0.8 * constants.c
 gamma = modern.lorentz_factor(v)
 dilated_time = modern.time_dilation(proper_time=1.0, velocity=v)
-print(f"勞侖茲因子: {gamma:.4f}")
-print(f"膨脹後的觀測時間: {dilated_time:.4f} 秒")
+print(f"Lorentz Factor: {gamma:.4f}")
+print(f"Dilated Time:   {dilated_time:.4f} s")
 
-# 質能等價 (1 kg 靜止質量能量)
-print(f"E = mc^2: {modern.rest_energy(1.0):.2e} J")
+# Mass-energy equivalence for 1 kg rest mass
+print(f"E = mc^2:       {modern.rest_energy(1.0):.2e} J")
 ```
 
-### 6. 單位轉換 (Unit Conversions)
+### 6. Unit Conversions
 ```python
 from funcpie.physics import units
 
@@ -144,55 +154,67 @@ print(units.convert(1, "light_year", "km"))      # 9.46e12 km
 
 ---
 
-## 專案結構 (Directory Structure)
+## Directory Structure
 
 ```
 func_pie/
-├── funcpie/                    # 主要套件目錄
-│   ├── __init__.py             # 核心匯出與版本號
-│   ├── py.typed                # PEP 561 型別支援標記
-│   ├── core/                   # 核心工具
+├── funcpie/                    # Main package source
+│   ├── __init__.py             # Public API exports & __version__
+│   ├── py.typed                # PEP 561 typing marker
+│   ├── core/                   # Core functional utilities
 │   │   ├── __init__.py
-│   │   └── pipeline.py         # 流式管道 (pipe, compose, curry, Pipeable)
-│   ├── math/                   # 數學模組
+│   │   └── pipeline.py         # Functional pipeline (pipe, compose, curry, Pipeable)
+│   ├── math/                   # Mathematics modules
 │   │   ├── __init__.py
-│   │   ├── basic.py            # 基本算術與安全運算
-│   │   ├── algebra.py          # 多項式、方程求根、數論、排列組合
-│   │   ├── calculus.py         # 數值微分、數值積分、求根法
-│   │   ├── linalg.py           # 2D/3D 向量、矩陣與線性方程求解
-│   │   ├── statistics.py       # 敘述統計、迴歸分析、機率分布
-│   │   ├── geometry.py         # 2D/3D 幾何圖形與座標轉換
-│   │   └── special.py          # Gamma, Beta, Erf, 激活函數
-│   └── physics/                # 物理模組
+│   │   ├── basic.py            # Basic arithmetic & safe operations
+│   │   ├── algebra.py          # Polynomials, roots, number theory, combinatorics
+│   │   ├── calculus.py         # Differentiation, integration, root finding
+│   │   ├── linalg.py           # Vectors (2D/3D), matrices, linear systems
+│   │   ├── statistics.py       # Descriptive statistics, regression, distributions
+│   │   ├── geometry.py         # 2D/3D geometry, coordinate transforms
+│   │   └── special.py          # Special functions (Gamma, Beta, Erf) & activations
+│   └── physics/                # Physics modules
 │       ├── __init__.py
-│       ├── constants.py        # CODATA 國際推薦物理常數
-│       ├── mechanics.py        # 運動學、動力學、重力、碰撞、諧振
-│       ├── thermodynamics.py   # 理想氣體、熱傳導、黑體輻射、熱機效率
-│       ├── electromagnetism.py # 庫侖定律、電路分析、電磁力
-│       ├── waves.py            # 波動、光學折射、薄透鏡、聲學
-│       ├── modern.py           # 相對論、光電效應、衰變定律
-│       └── units.py            # 跨領域物理單位轉換器
-├── func_pie/                   # 命名相容別名模組
-├── libs/                       # 原版相容模組 (libs.math.basic)
-├── tests/                      # 完整單元測試 (44+ 個測試項)
-├── examples/                   # 範例腳本
+│       ├── constants.py        # CODATA physical constants
+│       ├── mechanics.py        # Kinematics, dynamics, gravitation, collisions
+│       ├── thermodynamics.py   # Ideal gas, conduction, radiation, heat engines
+│       ├── electromagnetism.py # Coulomb's law, circuits, Lorentz force
+│       ├── waves.py            # Sound speed, Doppler, Snell's law, optics
+│       ├── modern.py           # Special relativity, photons, decay law
+│       └── units.py            # Comprehensive physical unit converter
+├── func_pie/                   # Package alias for backward compatibility
+├── libs/                       # Legacy compatibility module (libs.math.basic)
+├── tests/                      # Full unit test suite (44+ test cases)
+├── examples/                   # Executable example scripts
 │   ├── quickstart.py
 │   └── physics_simulation.py
-├── pyproject.toml              # PEP 517/621 建置設定
-├── setup.py                    # 相容性安裝檔
+├── pyproject.toml              # PEP 517/621 build configuration
+├── setup.py                    # Setup script for packaging
 └── LICENSE                     # MIT License
 ```
 
 ---
 
-## 測試 (Running Tests)
+## Running Tests & Type Checking
 
-使用 Python 原生內建測試執行器（亦相容 pytest）：
+### Running Tests
+Run the test suite using `pytest`:
+```bash
+pytest -v
+```
+Or use Python's built-in `unittest` runner:
 ```bash
 python3 -m unittest discover tests -v
 ```
 
-執行範例程式：
+### Static Type Checking
+Perform static type checking using `basedpyright`:
+```bash
+npx basedpyright
+```
+
+### Running Examples
+Execute example scripts:
 ```bash
 python3 examples/quickstart.py
 python3 examples/physics_simulation.py
@@ -200,6 +222,6 @@ python3 examples/physics_simulation.py
 
 ---
 
-## 授權條款 (License)
+## License
 
-本專案採用 [MIT License](LICENSE) 授權。
+This project is licensed under the [MIT License](LICENSE).

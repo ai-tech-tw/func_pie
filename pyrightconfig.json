@@ -1,0 +1,7 @@
+{
+  "include": ["funcpie", "tests", "examples"],
+  "exclude": [".venv", "**/__pycache__"],
+  "pythonVersion": "3.8",
+  "typeCheckingMode": "standard",
+  "reportMissingTypeStubs": "none"
+}
