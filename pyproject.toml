@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "funcpie"
+version = "1.0.0"
+authors = [
+  { name="SuperSonic", email="supersonic@livemail.tw" },
+]
+description = "Comprehensive Mathematic and Physical functions library for Python."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Typing :: Typed",
+]
+keywords = ["mathematics", "physics", "calculus", "linear-algebra", "statistics", "mechanics", "thermodynamics", "electromagnetism"]
+
+[project.urls]
+"Homepage" = "https://github.com/ai-tech-tw/func_pie"
+"Bug Tracker" = "https://github.com/ai-tech-tw/func_pie/issues"
+
+[tool.setuptools.packages.find]
+include = ["funcpie*", "func_pie*", "libs*"]
+
+[tool.setuptools.package-data]
+funcpie = ["py.typed"]
