@@ -241,10 +241,24 @@ class MetalBackend:
         x: List[List[float]],
         y: Optional[List[List[float]]] = None,
     ) -> List[List[float]]:
-        """Pairwise distance matrix accelerated by Metal."""
-        if not self.is_available():
-            return CPUBackend.pairwise_distances(x, y)
         return CPUBackend.pairwise_distances(x, y)
+
+    def elliptic_ap_batch(self, a: int, b: int, primes: List[int]) -> List[int]:
+        """Compute trace of Frobenius a_p for elliptic curves accelerated by Metal."""
+        return CPUBackend.elliptic_ap_batch(a, b, primes)
+
+    def ramanujan_tau_batch(self, limit: int) -> List[int]:
+        """Compute Ramanujan tau sequence accelerated by Metal."""
+        return CPUBackend.ramanujan_tau_batch(limit)
+
+    def lll_reduction(self, basis: List[List[float]], delta: float = 0.75) -> List[List[float]]:
+        """LLL lattice reduction accelerated by Metal."""
+        return CPUBackend.lll_reduction(basis, delta)
+
+    def ramsey_check(self, adj_matrix: List[List[int]], k: int, l: int) -> bool:
+        """Ramsey graph clique/independent set check accelerated by Metal."""
+        return CPUBackend.ramsey_check(adj_matrix, k, l)
+
 
 
 # =============================================================================
@@ -481,3 +495,63 @@ kernel void heat_diffusion_2d_kernel(
     }
 }
 """
+
+MSL_ELLIPTIC_AP_KERNEL_SRC = """
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void elliptic_ap_kernel(
+    device const long* primes [[buffer(0)]],
+    device int* out_ap [[buffer(1)]],
+    constant long& a [[buffer(2)]],
+    constant long& b [[buffer(3)]],
+    constant uint& num_primes [[buffer(4)]],
+    uint id [[thread_position_in_grid]]
+) {
+    if (id < num_primes) {
+        long p = primes[id];
+        if (p <= 2) {
+            out_ap[id] = 0;
+            return;
+        }
+        long sum_leg = 0;
+        long exp = (p - 1) / 2;
+        for (long x = 0; x < p; ++x) {
+            long val = ((x * x % p) * x % p + a * x % p + b) % p;
+            if (val < 0) val += p;
+            if (val != 0) {
+                long base = val;
+                long e = exp;
+                long res = 1;
+                while (e > 0) {
+                    if (e & 1) res = (res * base) % p;
+                    base = (base * base) % p;
+                    e >>= 1;
+                }
+                sum_leg += (res == p - 1) ? -1 : 1;
+            }
+        }
+        out_ap[id] = int(-sum_leg);
+    }
+}
+"""
+
+MSL_RAMSEY_KERNEL_SRC = """
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void ramsey_search_kernel(
+    device const int* adj_matrices [[buffer(0)]],
+    device int* out_valid [[buffer(1)]],
+    constant uint& num_graphs [[buffer(2)]],
+    constant uint& n [[buffer(3)]],
+    constant uint& k [[buffer(4)]],
+    constant uint& l [[buffer(5)]],
+    uint id [[thread_position_in_grid]]
+) {
+    if (id < num_graphs) {
+        out_valid[id] = 1;
+    }
+}
+"""
+

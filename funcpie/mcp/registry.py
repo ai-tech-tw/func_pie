@@ -229,6 +229,22 @@ class FuncPieRegistry:
             ("lorenz", "problems.lorenz", ["lorenz_step", "lorenz_ensemble", "lyapunov_exponent_estimate"]),
             ("navier_stokes", "problems.navier_stokes", ["navier_stokes_2d_step", "simulate_cavity_flow"]),
             ("tsp", "problems.tsp", ["tsp_simulated_annealing", "tsp_tour_distance"]),
+            ("bsd", "problems.bsd", [
+                "EllipticCurve", "discriminant", "j_invariant", "ap_point_count",
+                "elliptic_ap_batch", "largest_real_root", "real_period",
+                "l_function_estimate", "bsd_ratio_estimate", "goldfeld_twist_batch",
+            ]),
+            ("modular", "problems.modular", [
+                "gcd", "ramanujan_tau", "ramanujan_tau_batch",
+                "verify_multiplicative", "verify_deligne_bound",
+            ]),
+            ("lattice", "problems.lattice", [
+                "dot_product", "vector_norm", "gram_schmidt",
+                "lll_reduction", "lattice_determinant", "shortest_vector_bound",
+            ]),
+            ("combinatorics_open", "problems.combinatorics", [
+                "is_ramsey_graph", "ramsey_edge_density", "ramsey_random_search",
+            ]),
         ]
         for mod_name, cat_name, attrs in problem_modules:
             mod = getattr(problems, mod_name, None)

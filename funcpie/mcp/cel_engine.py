@@ -198,6 +198,13 @@ class CELEngine:
             "lorenz_step", "lorenz_ensemble", "lyapunov_exponent_estimate",
             "navier_stokes_2d_step", "simulate_cavity_flow",
             "tsp_simulated_annealing", "tsp_tour_distance",
+            "discriminant", "j_invariant", "ap_point_count", "elliptic_ap_batch",
+            "largest_real_root", "real_period", "l_function_estimate", "bsd_ratio_estimate",
+            "goldfeld_twist_batch",
+            "ramanujan_tau", "ramanujan_tau_batch", "verify_multiplicative", "verify_deligne_bound",
+            "dot_product", "vector_norm", "gram_schmidt", "lll_reduction",
+            "lattice_determinant", "shortest_vector_bound",
+            "is_ramsey_graph", "ramsey_edge_density", "ramsey_random_search",
         ]:
             if hasattr(problems, name):
                 self.functions[name] = _make_safe_caller(getattr(problems, name))

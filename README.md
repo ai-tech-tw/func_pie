@@ -185,6 +185,43 @@ cities = [(0.0, 0.0), (0.0, 4.0), (3.0, 4.0), (3.0, 0.0)]
 best_tour, best_dist = tsp_simulated_annealing(cities, num_walkers=8)
 ```
 
+### 8. OpenAI/math Theoretical Verification Suite
+```python
+from funcpie.problems import (
+    EllipticCurve,
+    bsd_ratio_estimate,
+    goldfeld_twist_batch,
+    ramanujan_tau,
+    verify_deligne_bound,
+    lll_reduction,
+    is_ramsey_graph,
+)
+
+# 1. Birch and Swinnerton-Dyer (BSD) Conjecture on curve y^2 = x^3 - x
+curve = EllipticCurve(-1.0, 0.0)
+primes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+bsd_ratio = bsd_ratio_estimate(-1, 0, primes)   # L(E, 1) / Omega_E
+twists = goldfeld_twist_batch(-1, 0, [-3, -1, 1, 3, 5], primes)
+
+# 2. Modular forms: Ramanujan tau function and Deligne bound (|tau(p)| <= 2 * p^(11/2))
+tau_2 = ramanujan_tau(2)                        # -24
+valid_bound, tau_p, bound = verify_deligne_bound(7)  # True, tau(7)=-16744
+
+# 3. LLL polynomial-time lattice basis reduction
+basis = [[1.0, 1.0, 1.0], [-1.0, 0.0, 2.0], [3.0, 5.0, 6.0]]
+reduced_basis = lll_reduction(basis, delta=0.75)
+
+# 4. Extremal Combinatorics: Ramsey graph validation (C_5 proves R(3, 3) > 5)
+c5 = [
+    [0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 1],
+    [1, 0, 0, 1, 0],
+]
+valid_ramsey = is_ramsey_graph(c5, k=3, l=3)     # True
+```
+
 ---
 
 ## Directory Structure
@@ -229,13 +266,18 @@ func_pie/
 │       ├── three_body.py       # Chaotic Three-Body gravitational orbits
 │       ├── lorenz.py           # Lorenz attractor & Lyapunov exponent
 │       ├── navier_stokes.py    # 2D Navier-Stokes fluid cavity solver
-│       └── tsp.py              # NP-hard TSP parallel simulated annealing
-├── tests/                      # Full unit test suite (82+ test cases)
+│       ├── tsp.py              # NP-hard TSP parallel simulated annealing
+│       ├── bsd.py              # Birch and Swinnerton-Dyer (BSD) & Elliptic curves
+│       ├── modular.py          # Modular forms & Ramanujan tau function
+│       ├── lattice.py          # LLL lattice basis reduction & shortest vector
+│       └── combinatorics_open.py # Ramsey graph checking & stochastic search
+├── tests/                      # Full unit test suite (89+ test cases)
 ├── examples/                   # Executable example scripts
 │   ├── quickstart.py
 │   ├── physics_simulation.py
 │   ├── hip_benchmark.py
-│   └── math_problems_showcase.py
+│   ├── math_problems_showcase.py
+│   └── openai_math_verifier.py
 ├── pyproject.toml              # PEP 517/621 build configuration
 ├── setup.py                    # Setup script for packaging
 └── LICENSE                     # MIT License

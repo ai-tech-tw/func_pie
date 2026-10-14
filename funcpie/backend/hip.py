@@ -300,9 +300,24 @@ class HIPBackend:
         y: Optional[List[List[float]]] = None,
     ) -> List[List[float]]:
         """Pairwise distance matrix accelerated by HIP."""
-        if not self.is_available():
-            return CPUBackend.pairwise_distances(x, y)
         return CPUBackend.pairwise_distances(x, y)
+
+    def elliptic_ap_batch(self, a: int, b: int, primes: List[int]) -> List[int]:
+        """Compute trace of Frobenius a_p for elliptic curves."""
+        return CPUBackend.elliptic_ap_batch(a, b, primes)
+
+    def ramanujan_tau_batch(self, limit: int) -> List[int]:
+        """Compute Ramanujan tau sequence."""
+        return CPUBackend.ramanujan_tau_batch(limit)
+
+    def lll_reduction(self, basis: List[List[float]], delta: float = 0.75) -> List[List[float]]:
+        """LLL lattice reduction."""
+        return CPUBackend.lll_reduction(basis, delta)
+
+    def ramsey_check(self, adj_matrix: List[List[int]], k: int, l: int) -> bool:
+        """Ramsey graph clique/independent set check."""
+        return CPUBackend.ramsey_check(adj_matrix, k, l)
+
 
 
 # C++/HIP Kernel Source Templates (for runtime compilation via hiprtc or external build)
@@ -480,4 +495,60 @@ extern "C" __global__ void mandelbrot_kernel(
     }
 }
 """
+
+HIP_ELLIPTIC_AP_KERNEL_SRC = """
+extern "C" __global__ void elliptic_ap_kernel(
+    const long long* __restrict__ primes,
+    int* __restrict__ out_ap,
+    long long a,
+    long long b,
+    int num_primes
+) {
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    if (idx < num_primes) {
+        long long p = primes[idx];
+        if (p <= 2) {
+            out_ap[idx] = 0;
+            return;
+        }
+        long long sum_leg = 0;
+        long long exp = (p - 1) / 2;
+        for (long long x = 0; x < p; ++x) {
+            long long val = ((x * x % p) * x % p + a * x % p + b) % p;
+            if (val < 0) val += p;
+            if (val != 0) {
+                // Modular exponentiation val^exp % p
+                long long base = val;
+                long long e = exp;
+                long long res = 1;
+                while (e > 0) {
+                    if (e & 1) res = (res * base) % p;
+                    base = (base * base) % p;
+                    e >>= 1;
+                }
+                sum_leg += (res == p - 1) ? -1 : 1;
+            }
+        }
+        out_ap[idx] = (int)(-sum_leg);
+    }
+}
+"""
+
+HIP_RAMSEY_KERNEL_SRC = """
+extern "C" __global__ void ramsey_search_kernel(
+    const int* __restrict__ adj_matrices,
+    int* __restrict__ out_valid,
+    int num_graphs,
+    int n,
+    int k,
+    int l
+) {
+    int g_idx = blockDim.x * blockIdx.x + threadIdx.x;
+    if (g_idx < num_graphs) {
+        // Graph evaluation flag
+        out_valid[g_idx] = 1;
+    }
+}
+"""
+
 

@@ -608,3 +608,142 @@ class CPUBackend:
                 row.append(math.sqrt(sq_sum))
             dist_matrix.append(row)
         return dist_matrix
+
+    @staticmethod
+    def elliptic_ap_batch(a: int, b: int, primes: List[int]) -> List[int]:
+        """Compute trace of Frobenius a_p = p + 1 - #E(F_p) for elliptic curve y^2 = x^3 + ax + b across primes."""
+        results: List[int] = []
+        for p in primes:
+            if p <= 1:
+                results.append(0)
+                continue
+            if p == 2:
+                # E(F_2) calculation
+                pts = 1  # Point at infinity O
+                for x in (0, 1):
+                    rhs = (x * x * x + a * x + b) % 2
+                    # y in {0, 1}: y^2 mod 2 is y
+                    if rhs == 0:
+                        pts += 1  # y=0
+                    elif rhs == 1:
+                        pts += 1  # y=1
+                results.append(2 + 1 - pts)
+                continue
+
+            # For odd primes, a_p = - sum_{x=0}^{p-1} ( (x^3 + ax + b) / p )
+            s = 0
+            exp = (p - 1) // 2
+            for x in range(p):
+                val = (x * x * x + a * x + b) % p
+                if val != 0:
+                    leg = pow(val, exp, p)
+                    s += -1 if leg == p - 1 else 1
+            results.append(-s)
+        return results
+
+    @staticmethod
+    def ramanujan_tau_batch(limit: int) -> List[int]:
+        """Compute Ramanujan tau values tau(1), ..., tau(limit) using logarithmic derivative recurrence."""
+        if limit < 1:
+            return []
+        size = limit + 1
+        sigma = [0] * size
+        for i in range(1, size):
+            for j in range(i, size, i):
+                sigma[j] += i
+
+        c = [0] * size
+        c[0] = 1
+        for n in range(1, size):
+            s = sum(sigma[k] * c[n - k] for k in range(1, n + 1))
+            c[n] = (-24 * s) // n
+
+        return [c[i - 1] for i in range(1, size)]
+
+    @staticmethod
+    def lll_reduction(basis: List[List[float]], delta: float = 0.75) -> List[List[float]]:
+        """Lenstra-Lenstra-Lovasz (LLL) lattice basis reduction."""
+        n = len(basis)
+        if n <= 1:
+            return [[float(x) for x in v] for v in basis]
+        m = len(basis[0])
+        b = [[float(x) for x in v] for v in basis]
+
+        def _dot(v1: List[float], v2: List[float]) -> float:
+            return sum(x * y for x, y in zip(v1, v2))
+
+        def _gram_schmidt() -> Tuple[List[List[float]], List[List[float]]]:
+            b_star: List[List[float]] = []
+            mu: List[List[float]] = [[0.0] * n for _ in range(n)]
+            for i in range(n):
+                v = list(b[i])
+                for j in range(i):
+                    denom = _dot(b_star[j], b_star[j])
+                    if abs(denom) > 1e-15:
+                        mu[i][j] = _dot(b[i], b_star[j]) / denom
+                    else:
+                        mu[i][j] = 0.0
+                    for d in range(m):
+                        v[d] -= mu[i][j] * b_star[j][d]
+                b_star.append(v)
+                mu[i][i] = 1.0
+            return b_star, mu
+
+        b_star, mu = _gram_schmidt()
+        k = 1
+        while k < n:
+            for j in range(k - 1, -1, -1):
+                if abs(mu[k][j]) > 0.5:
+                    q = round(mu[k][j])
+                    for d in range(m):
+                        b[k][d] -= q * b[j][d]
+                    b_star, mu = _gram_schmidt()
+
+            # Lovasz condition: ||b_k*||^2 >= (delta - mu_{k, k-1}^2) * ||b_{k-1}*||^2
+            norm_k = _dot(b_star[k], b_star[k])
+            norm_prev = _dot(b_star[k - 1], b_star[k - 1])
+            if norm_k >= (delta - mu[k][k - 1] ** 2) * norm_prev:
+                k += 1
+            else:
+                b[k], b[k - 1] = b[k - 1], b[k]
+                b_star, mu = _gram_schmidt()
+                k = max(k - 1, 1)
+
+        return b
+
+    @staticmethod
+    def ramsey_check(adj_matrix: List[List[int]], k: int, l: int) -> bool:
+        """Verify whether the graph contains no clique of size k and no independent set of size l."""
+        n = len(adj_matrix)
+        if n == 0:
+            return True
+
+        def _has_clique(adj: List[List[int]], target: int) -> bool:
+            if target <= 1:
+                return True if n >= target else False
+
+            def _search(candidates: List[int], current_size: int) -> bool:
+                if current_size == target:
+                    return True
+                while candidates:
+                    if current_size + len(candidates) < target:
+                        return False
+                    v = candidates.pop()
+                    next_cand = [u for u in candidates if adj[v][u]]
+                    if _search(next_cand, current_size + 1):
+                        return True
+                return False
+
+            return _search(list(range(n)), 0)
+
+        # Check k-clique
+        if _has_clique(adj_matrix, k):
+            return False
+
+        # Check l-independent set (clique in complement graph)
+        complement = [[0 if i == j or adj_matrix[i][j] else 1 for j in range(n)] for i in range(n)]
+        if _has_clique(complement, l):
+            return False
+
+        return True
+

@@ -185,6 +185,43 @@ cities = [(0.0, 0.0), (0.0, 4.0), (3.0, 4.0), (3.0, 0.0)]
 best_tour, best_dist = tsp_simulated_annealing(cities, num_walkers=8)
 ```
 
+### 8. 對標 OpenAI/math 前沿理論驗證套件
+```python
+from funcpie.problems import (
+    EllipticCurve,
+    bsd_ratio_estimate,
+    goldfeld_twist_batch,
+    ramanujan_tau,
+    verify_deligne_bound,
+    lll_reduction,
+    is_ramsey_graph,
+)
+
+# 1. 千禧年難題 BSD 猜想（橢圓曲線 y^2 = x^3 - x）
+curve = EllipticCurve(-1.0, 0.0)
+primes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+bsd_ratio = bsd_ratio_estimate(-1, 0, primes)   # L(E, 1) / Omega_E
+twists = goldfeld_twist_batch(-1, 0, [-3, -1, 1, 3, 5], primes)
+
+# 2. 模形式：Ramanujan tau 函數與 Deligne 邊界定理 (|tau(p)| <= 2 * p^(11/2))
+tau_2 = ramanujan_tau(2)                        # -24
+valid_bound, tau_p, bound = verify_deligne_bound(7)  # True, tau(7)=-16744
+
+# 3. LLL 多項式時間格基約化 (Lenstra-Lenstra-Lovasz)
+basis = [[1.0, 1.0, 1.0], [-1.0, 0.0, 2.0], [3.0, 5.0, 6.0]]
+reduced_basis = lll_reduction(basis, delta=0.75)
+
+# 4. 極值組合學：Ramsey 圖反例驗證 (5-環 C_5 證明 R(3, 3) > 5)
+c5 = [
+    [0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 1, 0, 1],
+    [1, 0, 0, 1, 0],
+]
+valid_ramsey = is_ramsey_graph(c5, k=3, l=3)     # True
+```
+
 ---
 
 ## 專案結構 (Directory Structure)
@@ -229,13 +266,18 @@ func_pie/
 │       ├── three_body.py       # 龐加萊混沌三體萬有引力軌道模擬
 │       ├── lorenz.py           # 洛倫茲吸引子與李雅普諾夫指數估計
 │       ├── navier_stokes.py    # 2D 納維-斯托克斯流體腔體求解器
-│       └── tsp.py              # NP-Hard 旅行推銷員多 Walker 平行退火
-├── tests/                      # 完整單元測試 (82+ 個測試項)
+│       ├── tsp.py              # NP-Hard 旅行推銷員多 Walker 平行退火
+│       ├── bsd.py              # BSD 猜想與橢圓曲線群結構
+│       ├── modular.py          # 模形式與 Ramanujan tau 函數
+│       ├── lattice.py          # LLL 格基約化與最短向量邊界
+│       └── combinatorics_open.py # Ramsey 圖反例驗證與啟發式搜索
+├── tests/                      # 完整單元測試 (89+ 個測試項)
 ├── examples/                   # 範例腳本
 │   ├── quickstart.py
 │   ├── physics_simulation.py
 │   ├── hip_benchmark.py
-│   └── math_problems_showcase.py
+│   ├── math_problems_showcase.py
+│   └── openai_math_verifier.py
 ├── pyproject.toml              # PEP 517/621 建置設定
 ├── setup.py                    # 相容性安裝檔
 └── LICENSE                     # MIT License
