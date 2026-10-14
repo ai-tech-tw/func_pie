@@ -283,11 +283,8 @@ class Matrix:
         if isinstance(other, Matrix):
             if self.cols != other.rows:
                 raise ValueError(f"Incompatible dimensions for multiplication: {self.shape} x {other.shape}")
-            res = [[0.0] * other.cols for _ in range(self.rows)]
-            for i in range(self.rows):
-                for k in range(self.cols):
-                    for j in range(other.cols):
-                        res[i][j] += self.data[i][k] * other.data[k][j]
+            from funcpie.backend import get_backend
+            res = get_backend().matmul(self.data, other.data)
             return Matrix(res)
         elif isinstance(other, (Vector2D, Vector3D)):
             vec_list = list(other)

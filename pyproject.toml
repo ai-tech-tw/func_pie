@@ -30,7 +30,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Typing :: Typed",
 ]
-keywords = ["mathematics", "physics", "calculus", "linear-algebra", "statistics", "mechanics", "thermodynamics", "electromagnetism"]
+keywords = ["mathematics", "physics", "calculus", "linear-algebra", "statistics", "mechanics", "thermodynamics", "electromagnetism", "hip", "rocm", "gpu-acceleration"]
 
 [project.urls]
 "Homepage" = "https://github.com/ai-tech-tw/func_pie"

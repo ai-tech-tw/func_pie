@@ -83,11 +83,9 @@ def simpsons_rule(f: ScalarFunc, a: float, b: float, n: int = 1000) -> float:
         return 0.0
 
     h = (b - a) / n
-    total = f(a) + f(b)
-    for i in range(1, n):
-        x = a + i * h
-        total += 4.0 * f(x) if i % 2 != 0 else 2.0 * f(x)
-    return total * (h / 3.0)
+    from funcpie.backend import get_backend
+    samples = [f(a + i * h) for i in range(n + 1)]
+    return get_backend().simpson_integrate_samples(samples, h)
 
 
 def integrate(

@@ -96,6 +96,16 @@ def projectile_trajectory(
     return points
 
 
+def batch_projectile_motion(
+    v0_list: List[float],
+    angle_deg_list: List[float],
+    gravity: float = g,
+) -> List[Tuple[float, float, float]]:
+    """Compute (max_height, flight_time, range) for a batch of projectiles using accelerated backend."""
+    from funcpie.backend import get_backend
+    return get_backend().batch_projectile(v0_list, angle_deg_list, gravity)
+
+
 def force(mass: float, acc: float) -> float:
     """Newton's second law: F = m * a."""
     if mass < 0:

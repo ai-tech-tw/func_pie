@@ -15,6 +15,7 @@ FuncPie is built with **zero external dependencies (Pure Python Standard Library
 
 ## Key Features
 
+- **AMD HIP GPU Acceleration**: Native hardware acceleration support via AMD ROCm HIP (`libamdhip64.so`), delivering high-throughput parallel compute for matrix multiplication, parallel numerical integration, and batch kinematics simulations, with seamless automatic fallback to CPU.
 - **Zero External Dependencies**: Pure Python standard library implementation with zero third-party packages. Extremely lightweight, instant installation, and consistent across platforms.
 - **Comprehensive Mathematics Suite**:
   - **Basic Arithmetic & Chaining**: `Calculation` class with method chaining, running accumulations, and safe division/modulo operations.
@@ -161,6 +162,10 @@ func_pie/
 ├── funcpie/                    # Main package source
 │   ├── __init__.py             # Public API exports & __version__
 │   ├── py.typed                # PEP 561 typing marker
+│   ├── backend/                # Compute backends (CPU fallback & AMD HIP)
+│   │   ├── __init__.py
+│   │   ├── cpu.py              # Pure Python standard CPU operations
+│   │   └── hip.py              # AMD HIP runtime acceleration via ctypes
 │   ├── core/                   # Core functional utilities
 │   │   ├── __init__.py
 │   │   └── pipeline.py         # Functional pipeline (pipe, compose, curry, Pipeable)
@@ -187,7 +192,8 @@ func_pie/
 ├── tests/                      # Full unit test suite (44+ test cases)
 ├── examples/                   # Executable example scripts
 │   ├── quickstart.py
-│   └── physics_simulation.py
+│   ├── physics_simulation.py
+│   └── hip_benchmark.py
 ├── pyproject.toml              # PEP 517/621 build configuration
 ├── setup.py                    # Setup script for packaging
 └── LICENSE                     # MIT License
@@ -213,11 +219,12 @@ Perform static type checking using `basedpyright`:
 npx basedpyright
 ```
 
-### Running Examples
-Execute example scripts:
+### Running Examples & Benchmarks
+Execute example and benchmark scripts:
 ```bash
 python3 examples/quickstart.py
 python3 examples/physics_simulation.py
+python3 examples/hip_benchmark.py
 ```
 
 ---

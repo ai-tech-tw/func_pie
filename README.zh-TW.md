@@ -15,6 +15,7 @@ FuncPie 堅持**零第三方外部依賴（Pure Python Standard Library）**，�
 
 ## 核心特色 (Key Features)
 
+- **AMD HIP 硬體加速 (AMD HIP GPU Acceleration)**：原生支援 AMD ROCm HIP (`libamdhip64.so`) 算力加速，為大型矩陣運算、平行數值積分與批次物理模擬提供高效能並行 GPU 算力；在無 AMD GPU 環境下具備無感自動 CPU 降級（Graceful Fallback）。
 - **零外部依賴 (Zero Dependencies)**：僅依賴 Python 原生標準庫，極致輕量、隨裝即用，跨平台一致。
 - **全面數學模組 (Comprehensive Mathematics)**：
   - **基礎運算 (Basic & Chaining)**：Calculation 鏈式與累加計算、安全運算。
@@ -161,6 +162,10 @@ func_pie/
 ├── funcpie/                    # 主要套件目錄
 │   ├── __init__.py             # 核心匯出與版本號
 │   ├── py.typed                # PEP 561 型別支援標記
+│   ├── backend/                # 運算後端 (CPU 降級與 AMD HIP 硬體加速)
+│   │   ├── __init__.py
+│   │   ├── cpu.py              # 原生純 Python CPU 運算
+│   │   └── hip.py              # AMD HIP 執行階段加速 (基於 ctypes)
 │   ├── core/                   # 核心工具
 │   │   ├── __init__.py
 │   │   └── pipeline.py         # 流式管道 (pipe, compose, curry, Pipeable)
@@ -187,7 +192,8 @@ func_pie/
 ├── tests/                      # 完整單元測試 (44+ 個測試項)
 ├── examples/                   # 範例腳本
 │   ├── quickstart.py
-│   └── physics_simulation.py
+│   ├── physics_simulation.py
+│   └── hip_benchmark.py
 ├── pyproject.toml              # PEP 517/621 建置設定
 ├── setup.py                    # 相容性安裝檔
 └── LICENSE                     # MIT License
@@ -213,10 +219,11 @@ python3 -m unittest discover tests -v
 npx basedpyright
 ```
 
-### 執行範例程式
+### 執行範例與基準測試
 ```bash
 python3 examples/quickstart.py
 python3 examples/physics_simulation.py
+python3 examples/hip_benchmark.py
 ```
 
 ---
