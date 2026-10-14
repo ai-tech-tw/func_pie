@@ -34,7 +34,6 @@ FuncPie is built with **zero external dependencies (Pure Python Standard Library
   - **Modern & Quantum Physics**: Special relativity Lorentz factor ($\gamma$), time dilation, length contraction, mass-energy equivalence ($E=mc^2$), photon energy, de Broglie matter wavelength, and radioactive half-life decay.
   - **Unit Converter**: Conversions across length, mass, time, pressure, energy, velocity, angle, and temperature scales.
 - **Functional Pipelines**: Native support for Unix-style pipelining syntax `value | f | g`, along with functional utilities `pipe()`, `compose()`, and `curry()`.
-- **Backward Compatible**: 100% backward compatible with legacy imports such as `libs.math.basic.Calculation` and `func_pie`.
 
 ---
 
@@ -187,9 +186,7 @@ func_pie/
 │       ├── waves.py            # Sound speed, Doppler, Snell's law, optics
 │       ├── modern.py           # Special relativity, photons, decay law
 │       └── units.py            # Comprehensive physical unit converter
-├── func_pie/                   # Package alias for backward compatibility
-├── libs/                       # Legacy compatibility module (libs.math.basic)
-├── tests/                      # Full unit test suite (44+ test cases)
+├── tests/                      # Full unit test suite (47+ test cases)
 ├── examples/                   # Executable example scripts
 │   ├── quickstart.py
 │   ├── physics_simulation.py

@@ -9,11 +9,7 @@ Number = Union[int, float]
 
 
 class Calculation:
-    """Arithmetic calculation engine supporting basic and extended operations.
-
-    Backward-compatible with the original FuncPie Calculation class,
-    with added support for optional chained accumulator calculations.
-    """
+    """Arithmetic calculation engine supporting basic and chained operations."""
 
     def __init__(self, initial: Optional[Number] = None):
         self.exec_code: List[str] = ["+", "-", "*", "/", "**", "//", "%"]

@@ -34,7 +34,6 @@ FuncPie 堅持**零第三方外部依賴（Pure Python Standard Library）**，�
   - **近代物理 (Modern & Quantum Physics)**：狹義相對論勞侖茲因子 $\gamma$、時間膨脹、長度收縮、質能等價 ($E=mc^2$)、光子能量、物質波波長、放射性衰變期。
   - **單位轉換器 (Unit Converter)**：長度、質量、時間、壓力、能量、速度、角度與溫標換算。
 - **流式函數管道 (Functional Pipelines)**：支援 Unix 風格的 `value | f | g` 管道與 `pipe()`, `compose()`, `curry()`。
-- **向後相容 (Backward Compatible)**：完全相容原先 `libs.math.basic.Calculation` 與 `func_pie` 引用。
 
 ---
 
@@ -187,9 +186,7 @@ func_pie/
 │       ├── waves.py            # 波動、光學折射、薄透鏡、聲學
 │       ├── modern.py           # 相對論、光電效應、衰變定律
 │       └── units.py            # 跨領域物理單位轉換器
-├── func_pie/                   # 命名相容別名模組
-├── libs/                       # 原版相容模組 (libs.math.basic)
-├── tests/                      # 完整單元測試 (44+ 個測試項)
+├── tests/                      # 完整單元測試 (47+ 個測試項)
 ├── examples/                   # 範例腳本
 │   ├── quickstart.py
 │   ├── physics_simulation.py

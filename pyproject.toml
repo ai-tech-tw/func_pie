@@ -46,7 +46,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["funcpie*", "func_pie*", "libs*"]
+include = ["funcpie*"]
 
 [tool.setuptools.package-data]
 funcpie = ["py.typed"]
