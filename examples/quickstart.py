@@ -25,11 +25,11 @@ def main():
 
     # Functional pipeline with | operator
     @pipeable
-    def add_ten(x):
+    def add_ten(x: int) -> int:
         return x + 10
 
     @pipeable
-    def square(x):
+    def square(x: int) -> int:
         return x ** 2
 
     piped_result = 5 | add_ten | square

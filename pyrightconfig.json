@@ -1,7 +1,17 @@
 {
   "include": ["funcpie", "tests", "examples"],
   "exclude": [".venv", "**/__pycache__"],
+  "venvPath": ".",
+  "venv": ".venv",
   "pythonVersion": "3.8",
   "typeCheckingMode": "standard",
-  "reportMissingTypeStubs": "none"
+  "reportMissingTypeStubs": "none",
+  "reportAny": "warning",
+  "reportExplicitAny": "error",
+  "reportMissingParameterType": "error",
+  "reportUnknownParameterType": "warning",
+  "reportUnknownLambdaType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportUnknownArgumentType": "warning",
+  "reportUnknownMemberType": "none"
 }

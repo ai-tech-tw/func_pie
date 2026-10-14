@@ -4,7 +4,7 @@ from funcpie.core.pipeline import pipe, compose, curry, Pipeable, pipeable, tap
 
 class TestPipeline(unittest.TestCase):
     def test_pipe(self):
-        res = pipe(5, lambda x: x + 1, lambda x: x * 2, str)
+        res = pipe(5, lambda x: int(x) + 1, lambda x: int(x) * 2, str)
         self.assertEqual(res, "12")
 
     def test_compose(self):
@@ -15,7 +15,7 @@ class TestPipeline(unittest.TestCase):
 
     def test_curry(self):
         @curry
-        def add3(a, b, c):
+        def add3(a: int, b: int, c: int) -> int:
             return a + b + c
 
         self.assertEqual(add3(1)(2)(3), 6)
@@ -31,7 +31,7 @@ class TestPipeline(unittest.TestCase):
 
     def test_pipeable_decorator(self):
         @pipeable
-        def square(x):
+        def square(x: int) -> int:
             return x ** 2
 
         self.assertEqual(4 | square, 16)
@@ -41,7 +41,7 @@ class TestPipeline(unittest.TestCase):
         res = pipe(
             10,
             tap(lambda x: logs.append(x)),
-            lambda x: x + 5
+            lambda x: int(x) + 5
         )
         self.assertEqual(res, 15)
         self.assertEqual(logs, [10])

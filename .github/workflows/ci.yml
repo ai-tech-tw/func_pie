@@ -29,6 +29,7 @@ jobs:
 
     - name: Run basedpyright Type Check
       run: |
+        mkdir -p .venv
         npx --yes basedpyright
 
     - name: Run Pytest

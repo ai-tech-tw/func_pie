@@ -4,26 +4,26 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, TypeVar
+from typing import Callable, TypeVar
 
 T = TypeVar("T")
 R = TypeVar("R")
 
 
-def pipe(value: Any, *funcs: Callable[..., Any]) -> Any:
+def pipe(value: object, *funcs: Callable[..., object]) -> object:
     """Pass a value through a sequence of functions left-to-right.
 
     Example:
         >>> pipe(5, lambda x: x + 1, lambda x: x * 2)
         12
     """
-    res = value
+    res: object = value
     for fn in funcs:
         res = fn(res)
     return res
 
 
-def compose(*funcs: Callable[..., Any]) -> Callable[..., Any]:
+def compose(*funcs: Callable[..., object]) -> Callable[..., object]:
     """Compose multiple functions right-to-left.
 
     compose(f, g, h)(x) == f(g(h(x)))
@@ -38,8 +38,8 @@ def compose(*funcs: Callable[..., Any]) -> Callable[..., Any]:
     if not funcs:
         return lambda x: x
 
-    def composed(*args: Any, **kwargs: Any) -> Any:
-        res = funcs[-1](*args, **kwargs)
+    def composed(*args: object, **kwargs: object) -> object:
+        res: object = funcs[-1](*args, **kwargs)
         for fn in reversed(funcs[:-1]):
             res = fn(res)
         return res
@@ -57,23 +57,23 @@ class Pipeable:
         12
     """
 
-    def __init__(self, fn: Callable[..., Any]):
+    def __init__(self, fn: Callable[..., object]):
         self.fn = fn
         functools.update_wrapper(self, fn)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    def __call__(self, *args: object, **kwargs: object) -> object:
         return self.fn(*args, **kwargs)
 
-    def __ror__(self, other: Any) -> Any:
+    def __ror__(self, other: object) -> object:
         return self.fn(other)
 
-    def __or__(self, other: Callable[..., Any]) -> Pipeable:
+    def __or__(self, other: Callable[..., object]) -> Pipeable:
         if isinstance(other, Pipeable):
             return Pipeable(lambda *args, **kwargs: other(self(*args, **kwargs)))
         return Pipeable(lambda *args, **kwargs: other(self(*args, **kwargs)))
 
 
-def pipeable(fn: Callable[..., Any]) -> Pipeable:
+def pipeable(fn: Callable[..., object]) -> Pipeable:
     """Decorator to make a function Pipeable with `|`.
 
     Example:
@@ -86,7 +86,14 @@ def pipeable(fn: Callable[..., Any]) -> Pipeable:
     return Pipeable(fn)
 
 
-def curry(fn: Callable[..., Any]) -> Callable[..., Any]:
+class CurriedCallable:
+    """Callable wrapper returned by curry allowing recursive partial application."""
+
+    def __call__(self, *args: object, **kwargs: object) -> CurriedCallable:
+        ...
+
+
+def curry(fn: Callable[..., object]) -> CurriedCallable:
     """Curry a function so it can be called with arguments one at a time.
 
     Example:
@@ -111,17 +118,17 @@ def curry(fn: Callable[..., Any]) -> Callable[..., Any]:
     min_args = len(required_args)
 
     @functools.wraps(fn)
-    def curried(*args: Any, **kwargs: Any) -> Any:
+    def curried(*args: object, **kwargs: object) -> object:
         if len(args) >= min_args:
             return fn(*args, **kwargs)
         return lambda *more_args, **more_kwargs: curried(
             *(args + more_args), **{**kwargs, **more_kwargs}
         )
 
-    return curried
+    return curried  # type: ignore[return-value]
 
 
-def tap(action: Callable[[T], Any]) -> Callable[[T], T]:
+def tap(action: Callable[[T], object]) -> Callable[[T], T]:
     """Execute a side-effect function on value and return the value unmodified.
 
     Useful in pipelines for debugging or logging.

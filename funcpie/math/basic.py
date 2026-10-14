@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, overload
+from typing import Callable, Dict, List, Optional, Tuple, Union, overload
 
 Number = Union[int, float]
 
@@ -18,7 +18,7 @@ class Calculation:
     def __init__(self, initial: Optional[Number] = None):
         self.exec_code: List[str] = ["+", "-", "*", "/", "**", "//", "%"]
         self._current_value: Optional[float] = float(initial) if initial is not None else None
-        self.exec: Dict[str, Any] = {}
+        self.exec: Dict[str, Callable[..., object]] = {}
 
     @property
     def value(self) -> Optional[float]:
@@ -146,7 +146,7 @@ class Calculation:
         self._current_value = float(res)
         return res
 
-    def usage(self) -> Tuple[Dict[str, Any], List[str]]:
+    def usage(self) -> Tuple[Dict[str, Callable[..., object]], List[str]]:
         """Return dictionary mapping operator strings to methods and the list of codes."""
         self.exec = {
             self.exec_code[0]: self.add,
