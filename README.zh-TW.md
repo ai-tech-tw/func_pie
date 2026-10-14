@@ -229,22 +229,32 @@ python3 examples/hip_benchmark.py
 
 FuncPie 支援透過 [FastMCP](https://github.com/jlowin/fastmcp) 將完整的物理運算模組（力學、熱力學、電磁學、波動光學、近代物理、單位轉換與常數查詢）作為標準 MCP 服務提供給 AI 助理（如 Claude Desktop、Cursor、各式 Bot）：
 
-### 安裝與啟動
+### 啟動方式 (使用 uvx 直接自 GitHub 載入，免手動安裝)
 ```bash
-pip install -e ".[mcp]"
-funcpie-mcp
+uvx --from "git+https://github.com/ai-tech-tw/func_pie[mcp]" funcpie-mcp
 ```
 
-### Claude Desktop / Cursor 設定範例
-在客戶端設定檔（如 `claude_desktop_config.json`）中加入：
+### Claude Desktop / Cursor / Bot 設定範例
+在客戶端設定檔（如 `claude_desktop_config.json`）中設定 `uvx`，Bot 啟動時會自動由 GitHub 載入最新版環境執行：
 ```json
 {
   "mcpServers": {
     "funcpie-physics": {
-      "command": "funcpie-mcp"
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/ai-tech-tw/func_pie[mcp]",
+        "funcpie-mcp"
+      ]
     }
   }
 }
+```
+
+亦支援傳統本機預先安裝執行：
+```bash
+pip install -e ".[mcp]"
+funcpie-mcp
 ```
 具備 30+ 項物理計算 Tools、物理常數 Resource (`physics://constants`) 以及物理題目求解 Prompt 範本 (`physics_problem_solver`)。
 

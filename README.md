@@ -230,22 +230,32 @@ python3 examples/hip_benchmark.py
 
 FuncPie integrates with [FastMCP](https://github.com/jlowin/fastmcp) to expose comprehensive physics computation tools (Mechanics, Thermodynamics, Electromagnetism, Waves & Optics, Modern Physics, Units & Constants) to AI assistants (e.g., Claude Desktop, Cursor, and custom Bots):
 
-### Installation & Launch
+### Running with uvx (Direct from GitHub, Zero Installation)
 ```bash
-pip install -e ".[mcp]"
-funcpie-mcp
+uvx --from "git+https://github.com/ai-tech-tw/func_pie[mcp]" funcpie-mcp
 ```
 
-### Client Configuration (e.g. Claude Desktop)
-Add the server to your `claude_desktop_config.json`:
+### Client Configuration (Claude Desktop, Cursor, AI Bots)
+Configure your client (such as `claude_desktop_config.json`) to invoke `uvx`, automatically provisioning the latest environment on demand:
 ```json
 {
   "mcpServers": {
     "funcpie-physics": {
-      "command": "funcpie-mcp"
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/ai-tech-tw/func_pie[mcp]",
+        "funcpie-mcp"
+      ]
     }
   }
 }
+```
+
+Or install locally in your Python environment:
+```bash
+pip install -e ".[mcp]"
+funcpie-mcp
 ```
 Exposes 30+ precision physical tools, CODATA physical constants resource (`physics://constants`), and a physics problem solving prompt template (`physics_problem_solver`).
 
