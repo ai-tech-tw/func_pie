@@ -1,8 +1,10 @@
 """Tests for FuncPie MCP dynamic discovery and runner execution architecture."""
 
-from __future__ import annotations
-
-import pytest
+try:
+    import pytest
+except ImportError:
+    import unittest
+    raise unittest.SkipTest("pytest is not installed")
 
 from funcpie.mcp.registry import FuncPieRegistry, get_registry
 

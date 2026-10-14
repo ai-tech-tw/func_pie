@@ -187,6 +187,21 @@ class CELEngine:
                 else:
                     self.constants[attr] = val
 
+        # 12. Mathematical Problems & Conjectures
+        from funcpie import problems
+        for name in [
+            "collatz_sequence", "collatz_batch_verify", "collatz_longest_chain",
+            "goldbach_partition", "goldbach_batch_verify", "goldbach_count_partitions",
+            "mersenne_number", "lucas_lehmer_mersenne", "segmented_prime_sieve", "twin_primes_scan",
+            "riemann_zeta_critical_line", "find_zeta_zeros_approx",
+            "three_body_step", "three_body_simulation", "figure_eight_initial_conditions",
+            "lorenz_step", "lorenz_ensemble", "lyapunov_exponent_estimate",
+            "navier_stokes_2d_step", "simulate_cavity_flow",
+            "tsp_simulated_annealing", "tsp_tour_distance",
+        ]:
+            if hasattr(problems, name):
+                self.functions[name] = _make_safe_caller(getattr(problems, name))
+
     def evaluate(
         self,
         expression: str,

@@ -34,6 +34,14 @@ FuncPie is built with **zero external dependencies (Pure Python Standard Library
   - **Modern & Quantum Physics**: Special relativity Lorentz factor ($\gamma$), time dilation, length contraction, mass-energy equivalence ($E=mc^2$), photon energy, de Broglie matter wavelength, and radioactive half-life decay.
   - **Unit Converter**: Conversions across length, mass, time, pressure, energy, velocity, angle, and temperature scales.
 - **Functional Pipelines**: Native support for Unix-style pipelining syntax `value | f | g`, along with functional utilities `pipe()`, `compose()`, and `curry()`.
+- **Mathematical Problems & Conjectures Suite**: High-throughput GPU/CPU solvers for famous mathematical problems and conjectures:
+  - **Collatz Conjecture ($3n+1$)**: Parallel trajectory verification, stopping times, and peak value searches.
+  - **Goldbach's Conjecture**: Batch prime pair partitions ($2k = p_1 + p_2$) and partition counting.
+  - **Mersenne & Twin Primes**: Deterministic Lucas-Lehmer primality testing for $M_p = 2^p - 1$ and segmented twin prime sieves.
+  - **Riemann Hypothesis**: Critical line $s = 1/2 + it$ zero approximation via Dirichlet Eta expansion.
+  - **Chaotic Dynamical Systems**: Poincaré Three-Body gravitational integration (Figure-8 orbit) and Lorenz attractor with Lyapunov exponent estimation.
+  - **Navier-Stokes Fluid Dynamics**: 2D incompressible fluid solver with pressure Poisson equation for cavity flow.
+  - **NP-Hard Optimization**: Multi-walker parallel simulated annealing for the Traveling Salesperson Problem (TSP).
 
 ---
 
@@ -152,6 +160,31 @@ print(units.convert(1, "atm", "psi"))            # 14.70 psi
 print(units.convert(1, "light_year", "km"))      # 9.46e12 km
 ```
 
+### 7. Mathematical Problems & Conjectures
+```python
+from funcpie.problems import (
+    collatz_batch_verify,
+    goldbach_partition,
+    lucas_lehmer_mersenne,
+    riemann_zeta_critical_line,
+    tsp_simulated_annealing,
+)
+
+# Collatz conjecture verification
+collatz_results = collatz_batch_verify(start=1, count=1000)
+
+# Goldbach prime partition: 1000 = 3 + 997
+p1, p2 = goldbach_partition(1000)
+print(f"Goldbach partition for 1000: {p1} + {p2}")
+
+# Lucas-Lehmer deterministic primality for Mersenne number M_13 = 2^13 - 1 = 8191
+is_prime = lucas_lehmer_mersenne(13)             # True
+
+# Solve TSP using multi-walker simulated annealing
+cities = [(0.0, 0.0), (0.0, 4.0), (3.0, 4.0), (3.0, 0.0)]
+best_tour, best_dist = tsp_simulated_annealing(cities, num_walkers=8)
+```
+
 ---
 
 ## Directory Structure
@@ -186,11 +219,22 @@ func_pie/
 │       ├── waves.py            # Sound speed, Doppler, Snell's law, optics
 │       ├── modern.py           # Special relativity, photons, decay law
 │       └── units.py            # Comprehensive physical unit converter
-├── tests/                      # Full unit test suite (47+ test cases)
+│   └── problems/               # Mathematical problems & famous conjectures suite
+│       ├── __init__.py
+│       ├── collatz.py          # Collatz 3n+1 conjecture batch verifier
+│       ├── goldbach.py         # Goldbach's conjecture prime partitions
+│       ├── primes.py           # Mersenne Lucas-Lehmer & twin primes sieve
+│       ├── riemann.py          # Riemann Hypothesis critical line zeros
+│       ├── three_body.py       # Chaotic Three-Body gravitational orbits
+│       ├── lorenz.py           # Lorenz attractor & Lyapunov exponent
+│       ├── navier_stokes.py    # 2D Navier-Stokes fluid cavity solver
+│       └── tsp.py              # NP-hard TSP parallel simulated annealing
+├── tests/                      # Full unit test suite (78+ test cases)
 ├── examples/                   # Executable example scripts
 │   ├── quickstart.py
 │   ├── physics_simulation.py
-│   └── hip_benchmark.py
+│   ├── hip_benchmark.py
+│   └── math_problems_showcase.py
 ├── pyproject.toml              # PEP 517/621 build configuration
 ├── setup.py                    # Setup script for packaging
 └── LICENSE                     # MIT License

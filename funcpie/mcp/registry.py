@@ -209,6 +209,25 @@ class FuncPieRegistry:
             if hasattr(backend, attr):
                 self._register(attr, f"funcpie.backend.{attr}", "backend", getattr(backend, attr))
 
+        # 15. Mathematical Problems & Conjectures
+        from funcpie import problems
+        problem_modules = [
+            ("collatz", "problems.collatz", ["collatz_sequence", "collatz_batch_verify", "collatz_longest_chain"]),
+            ("goldbach", "problems.goldbach", ["goldbach_partition", "goldbach_batch_verify", "goldbach_count_partitions"]),
+            ("primes", "problems.primes", ["mersenne_number", "lucas_lehmer_mersenne", "segmented_prime_sieve", "twin_primes_scan"]),
+            ("riemann", "problems.riemann", ["riemann_zeta_critical_line", "find_zeta_zeros_approx"]),
+            ("three_body", "problems.three_body", ["three_body_step", "three_body_simulation", "figure_eight_initial_conditions"]),
+            ("lorenz", "problems.lorenz", ["lorenz_step", "lorenz_ensemble", "lyapunov_exponent_estimate"]),
+            ("navier_stokes", "problems.navier_stokes", ["navier_stokes_2d_step", "simulate_cavity_flow"]),
+            ("tsp", "problems.tsp", ["tsp_simulated_annealing", "tsp_tour_distance"]),
+        ]
+        for mod_name, cat_name, attrs in problem_modules:
+            mod = getattr(problems, mod_name, None)
+            if mod:
+                for attr in attrs:
+                    if hasattr(mod, attr):
+                        self._register(attr, f"funcpie.problems.{attr}", cat_name, getattr(mod, attr))
+
     def search(self, query: str, category: str | None = None) -> list[dict[str, object]]:
         """Search registered items by name, docstring, or category."""
         q = query.lower().strip()

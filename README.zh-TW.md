@@ -34,6 +34,14 @@ FuncPie 堅持**零第三方外部依賴（Pure Python Standard Library）**，�
   - **近代物理 (Modern & Quantum Physics)**：狹義相對論勞侖茲因子 $\gamma$、時間膨脹、長度收縮、質能等價 ($E=mc^2$)、光子能量、物質波波長、放射性衰變期。
   - **單位轉換器 (Unit Converter)**：長度、質量、時間、壓力、能量、速度、角度與溫標換算。
 - **流式函數管道 (Functional Pipelines)**：支援 Unix 風格的 `value | f | g` 管道與 `pipe()`, `compose()`, `curry()`。
+- **經典數學難題與猜想求解套件 (Mathematical Problems & Conjectures)**：
+  - **考拉茲猜想 ($3n+1$)**：平行整數軌跡模擬、逃逸步數（Stopping Time）統計與軌跡峰值反例搜尋。
+  - **哥德巴赫猜想**：大偶數平行質數拆解（$2k = p_1 + p_2$）與分拆數計算。
+  - **梅森質數與孿生質數**：大數盧卡斯-萊默（Lucas-Lehmer）確定性質數檢驗法與區間分段篩法。
+  - **黎曼猜想**：臨界線 $s = 1/2 + it$ 狄利克雷 Eta 展開數值逼近與非平凡零點探索。
+  - **混沌動力系統**：龐加萊三體重力軌道積分（Figure-8 經典編舞軌道）與洛倫茲吸引子李雅普諾夫指數（蝴蝶效應量化）。
+  - **納維-斯托克斯流體力學**：二維不可壓縮黏性流體動量對流擴散與壓力泊松投影（Lid-driven cavity flow）。
+  - **NP-Hard 最佳化**：旅行推銷員問題（TSP）大規模多 Walker 平行模擬退火（Simulated Annealing）求解。
 
 ---
 
@@ -152,6 +160,31 @@ print(units.convert(1, "atm", "psi"))            # 14.70 psi
 print(units.convert(1, "light_year", "km"))      # 9.46e12 km
 ```
 
+### 7. 數學難題與經典猜想 (Mathematical Problems & Conjectures)
+```python
+from funcpie.problems import (
+    collatz_batch_verify,
+    goldbach_partition,
+    lucas_lehmer_mersenne,
+    riemann_zeta_critical_line,
+    tsp_simulated_annealing,
+)
+
+# 考拉茲猜想批次驗證
+collatz_results = collatz_batch_verify(start=1, count=1000)
+
+# 哥德巴赫猜想質數拆解：1000 = 3 + 997
+p1, p2 = goldbach_partition(1000)
+print(f"1000 的哥德巴赫質數對拆解: {p1} + {p2}")
+
+# 盧卡斯-萊默確定性質數檢驗法：驗證梅森數 M_13 = 2^13 - 1 = 8191
+is_prime = lucas_lehmer_mersenne(13)             # True
+
+# 旅行推銷員問題 (TSP) 多 Walker 並行模擬退火求解
+cities = [(0.0, 0.0), (0.0, 4.0), (3.0, 4.0), (3.0, 0.0)]
+best_tour, best_dist = tsp_simulated_annealing(cities, num_walkers=8)
+```
+
 ---
 
 ## 專案結構 (Directory Structure)
@@ -186,11 +219,22 @@ func_pie/
 │       ├── waves.py            # 波動、光學折射、薄透鏡、聲學
 │       ├── modern.py           # 相對論、光電效應、衰變定律
 │       └── units.py            # 跨領域物理單位轉換器
-├── tests/                      # 完整單元測試 (47+ 個測試項)
+│   └── problems/               # 經典數學難題與猜想求解套件
+│       ├── __init__.py
+│       ├── collatz.py          # 考拉茲 3n+1 猜想批次驗證器
+│       ├── goldbach.py         # 哥德巴赫猜想質數對拆解
+│       ├── primes.py           # 梅森質數 Lucas-Lehmer 檢驗與孿生質數篩
+│       ├── riemann.py          # 黎曼猜想臨界線非平凡零點探索
+│       ├── three_body.py       # 龐加萊混沌三體萬有引力軌道模擬
+│       ├── lorenz.py           # 洛倫茲吸引子與李雅普諾夫指數估計
+│       ├── navier_stokes.py    # 2D 納維-斯托克斯流體腔體求解器
+│       └── tsp.py              # NP-Hard 旅行推銷員多 Walker 平行退火
+├── tests/                      # 完整單元測試 (78+ 個測試項)
 ├── examples/                   # 範例腳本
 │   ├── quickstart.py
 │   ├── physics_simulation.py
-│   └── hip_benchmark.py
+│   ├── hip_benchmark.py
+│   └── math_problems_showcase.py
 ├── pyproject.toml              # PEP 517/621 建置設定
 ├── setup.py                    # 相容性安裝檔
 └── LICENSE                     # MIT License

@@ -4,7 +4,7 @@ __version__ = "1.0.0"
 __author__ = "SuperSonic"
 __license__ = "MIT"
 
-from funcpie import backend, core, math, physics
+from funcpie import backend, core, math, physics, problems
 from funcpie.backend import (
     get_backend,
     get_device_properties,
@@ -21,6 +21,7 @@ __all__ = [
     "physics",
     "core",
     "backend",
+    "problems",
     "is_hip_available",
     "get_backend",
     "set_backend",
