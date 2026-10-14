@@ -15,7 +15,7 @@ FuncPie 堅持**零第三方外部依賴（Pure Python Standard Library）**，�
 
 ## 核心特色 (Key Features)
 
-- **AMD HIP 硬體加速 (AMD HIP GPU Acceleration)**：原生支援 AMD ROCm HIP (`libamdhip64.so`) 算力加速，為大型矩陣運算、平行數值積分與批次物理模擬提供高效能並行 GPU 算力；在無 AMD GPU 環境下具備無感自動 CPU 降級（Graceful Fallback）。
+- **跨平台 GPU 硬體加速 (AMD HIP & Apple Silicon Metal)**：原生支援 Linux/Windows 的 AMD ROCm HIP (`libamdhip64.so` / CUDA 相容模式) 以及 macOS 的 Apple Silicon Metal (`Metal.framework` 與 MSL 著色器)，為大型矩陣運算、N-Body 模擬、PDE 數值求解與數學猜想提供高吞吐量並行算力；在無 GPU 環境下自動優雅降級為純 Python CPU。
 - **零外部依賴 (Zero Dependencies)**：僅依賴 Python 原生標準庫，極致輕量、隨裝即用，跨平台一致。
 - **全面數學模組 (Comprehensive Mathematics)**：
   - **基礎運算 (Basic & Chaining)**：Calculation 鏈式與累加計算、安全運算。
@@ -194,10 +194,11 @@ func_pie/
 ├── funcpie/                    # 主要套件目錄
 │   ├── __init__.py             # 核心匯出與版本號
 │   ├── py.typed                # PEP 561 型別支援標記
-│   ├── backend/                # 運算後端 (CPU 降級與 AMD HIP 硬體加速)
+│   ├── backend/                # 運算後端 (CPU 降級、AMD HIP 與 Apple Metal 硬體加速)
 │   │   ├── __init__.py
 │   │   ├── cpu.py              # 原生純 Python CPU 運算
-│   │   └── hip.py              # AMD HIP 執行階段加速 (基於 ctypes)
+│   │   ├── hip.py              # AMD HIP 執行階段加速 (基於 ctypes)
+│   │   └── metal.py            # Apple Silicon Metal 執行階段加速 (基於 ctypes)
 │   ├── core/                   # 核心工具
 │   │   ├── __init__.py
 │   │   └── pipeline.py         # 流式管道 (pipe, compose, curry, Pipeable)
@@ -229,7 +230,7 @@ func_pie/
 │       ├── lorenz.py           # 洛倫茲吸引子與李雅普諾夫指數估計
 │       ├── navier_stokes.py    # 2D 納維-斯托克斯流體腔體求解器
 │       └── tsp.py              # NP-Hard 旅行推銷員多 Walker 平行退火
-├── tests/                      # 完整單元測試 (78+ 個測試項)
+├── tests/                      # 完整單元測試 (82+ 個測試項)
 ├── examples/                   # 範例腳本
 │   ├── quickstart.py
 │   ├── physics_simulation.py

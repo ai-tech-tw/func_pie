@@ -15,7 +15,7 @@ FuncPie is built with **zero external dependencies (Pure Python Standard Library
 
 ## Key Features
 
-- **AMD HIP GPU Acceleration**: Native hardware acceleration support via AMD ROCm HIP (`libamdhip64.so`), delivering high-throughput parallel compute for matrix multiplication, parallel numerical integration, and batch kinematics simulations, with seamless automatic fallback to CPU.
+- **Cross-Platform GPU Acceleration (AMD HIP & Apple Silicon Metal)**: Native hardware acceleration support via AMD ROCm HIP (`libamdhip64.so` / CUDA compatibility) on Linux/Windows and Apple Metal (`Metal.framework` via MSL compute shaders) on macOS Apple Silicon (M1/M2/M3/M4), delivering high-throughput parallel compute for matrix operations, N-Body simulations, PDEs, and mathematical conjectures, with seamless automatic fallback to CPU.
 - **Zero External Dependencies**: Pure Python standard library implementation with zero third-party packages. Extremely lightweight, instant installation, and consistent across platforms.
 - **Comprehensive Mathematics Suite**:
   - **Basic Arithmetic & Chaining**: `Calculation` class with method chaining, running accumulations, and safe division/modulo operations.
@@ -194,10 +194,11 @@ func_pie/
 ├── funcpie/                    # Main package source
 │   ├── __init__.py             # Public API exports & __version__
 │   ├── py.typed                # PEP 561 typing marker
-│   ├── backend/                # Compute backends (CPU fallback & AMD HIP)
+│   ├── backend/                # Compute backends (CPU fallback, AMD HIP & Apple Metal)
 │   │   ├── __init__.py
 │   │   ├── cpu.py              # Pure Python standard CPU operations
-│   │   └── hip.py              # AMD HIP runtime acceleration via ctypes
+│   │   ├── hip.py              # AMD HIP runtime acceleration via ctypes
+│   │   └── metal.py            # Apple Silicon Metal acceleration via ctypes
 │   ├── core/                   # Core functional utilities
 │   │   ├── __init__.py
 │   │   └── pipeline.py         # Functional pipeline (pipe, compose, curry, Pipeable)
@@ -229,7 +230,7 @@ func_pie/
 │       ├── lorenz.py           # Lorenz attractor & Lyapunov exponent
 │       ├── navier_stokes.py    # 2D Navier-Stokes fluid cavity solver
 │       └── tsp.py              # NP-hard TSP parallel simulated annealing
-├── tests/                      # Full unit test suite (78+ test cases)
+├── tests/                      # Full unit test suite (82+ test cases)
 ├── examples/                   # Executable example scripts
 │   ├── quickstart.py
 │   ├── physics_simulation.py

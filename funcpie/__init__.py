@@ -9,6 +9,7 @@ from funcpie.backend import (
     get_backend,
     get_device_properties,
     is_hip_available,
+    is_metal_available,
     set_backend,
 )
 from funcpie.core import Pipeable, compose, curry, pipe, pipeable, tap
@@ -23,6 +24,7 @@ __all__ = [
     "backend",
     "problems",
     "is_hip_available",
+    "is_metal_available",
     "get_backend",
     "set_backend",
     "get_device_properties",

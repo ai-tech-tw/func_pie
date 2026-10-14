@@ -205,7 +205,16 @@ class FuncPieRegistry:
                 self._register(attr, f"funcpie.core.{attr}", "core.pipeline", getattr(pipeline, attr))
 
         # 14. Backend
-        for attr in ["get_backend", "set_backend", "is_hip_available", "get_device_properties"]:
+        for attr in [
+            "get_backend",
+            "set_backend",
+            "is_hip_available",
+            "is_metal_available",
+            "get_device_properties",
+            "MetalBackend",
+            "HIPBackend",
+            "CPUBackend",
+        ]:
             if hasattr(backend, attr):
                 self._register(attr, f"funcpie.backend.{attr}", "backend", getattr(backend, attr))
 
