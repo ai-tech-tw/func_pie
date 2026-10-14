@@ -226,6 +226,31 @@ python3 examples/hip_benchmark.py
 
 ---
 
+## FastMCP Physics Server (Model Context Protocol)
+
+FuncPie integrates with [FastMCP](https://github.com/jlowin/fastmcp) to expose comprehensive physics computation tools (Mechanics, Thermodynamics, Electromagnetism, Waves & Optics, Modern Physics, Units & Constants) to AI assistants (e.g., Claude Desktop, Cursor, and custom Bots):
+
+### Installation & Launch
+```bash
+pip install -e ".[mcp]"
+funcpie-mcp
+```
+
+### Client Configuration (e.g. Claude Desktop)
+Add the server to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "funcpie-physics": {
+      "command": "funcpie-mcp"
+    }
+  }
+}
+```
+Exposes 30+ precision physical tools, CODATA physical constants resource (`physics://constants`), and a physics problem solving prompt template (`physics_problem_solver`).
+
+---
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
