@@ -277,9 +277,14 @@ Remote AI Bot Client Configuration (Claude Desktop, Cursor, Antigravity):
   }
 }
 ```
-*(Also supports `Authorization: Bearer <key>` header)*
+### Modern Agent Architecture: Discovery & Execution Engine
+To prevent LLM context bloating and tool flooding, FuncPie MCP exposes 4 streamlined core tools covering all mathematics, physics, and arithmetic operations:
+- `funcpie_search(query, category=None)`: Discover functions, formulas, and physical constants.
+- `funcpie_list(category=None)`: Browse functions organized by module (`math.basic`, `physics.mechanics`, etc.).
+- `funcpie_describe(name)`: Inspect full signatures, parameter types, formulas, and docstrings.
+- `funcpie_execute(code, use_gpu=False)`: Execute complete FuncPie calculation scripts in a single round-trip (fluent `Calculation`, functional `pipe`, physics formulas, and GPU acceleration).
 
-Exposes 30+ precision physical tools, CODATA physical constants resource (`physics://constants`), and a physics problem solving prompt template (`physics_problem_solver`).
+*(For legacy granular tools, pass `--legacy-tools`)*
 
 ---
 

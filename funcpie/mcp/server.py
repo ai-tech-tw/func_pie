@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from funcpie.mcp.auth import APIKeyAuthenticator, APIKeyMiddleware
 from funcpie.mcp.tools_physics import register_physics_tools
+from funcpie.mcp.tools_runner import register_runner_tools
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
@@ -29,18 +30,21 @@ def get_fastmcp_class() -> type[FastMCP]:
     )
 
 
-def create_mcp_server(name: str = "funcpie-physics") -> FastMCP:
-    """Create and configure a FastMCP server instance equipped with physics tools.
+def create_mcp_server(name: str = "funcpie-physics", legacy_tools: bool = False) -> FastMCP:
+    """Create and configure a FastMCP server instance equipped with discovery and runner tools.
 
     Args:
         name: Name identifier for the MCP server.
+        legacy_tools: If True, also register individual legacy physics tools.
 
     Returns:
         Configured FastMCP instance ready for execution.
     """
     fastmcp_cls = get_fastmcp_class()
     mcp = fastmcp_cls(name)
-    register_physics_tools(mcp)
+    register_runner_tools(mcp)
+    if legacy_tools:
+        register_physics_tools(mcp)
     return mcp
 
 
@@ -82,9 +86,14 @@ def main() -> None:
         default="FUNCPie_API_KEY",
         help="Environment variable name to read API Key / Argon2 hash from (default: FUNCPie_API_KEY)",
     )
+    parser.add_argument(
+        "--legacy-tools",
+        action="store_true",
+        help="Register legacy granular physics tools in addition to runner tools (default: False)",
+    )
     args = parser.parse_args()
 
-    mcp = create_mcp_server(name=args.name)
+    mcp = create_mcp_server(name=args.name, legacy_tools=args.legacy_tools)
 
     try:
         if args.transport == "stdio":

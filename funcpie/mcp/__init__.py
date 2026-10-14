@@ -10,11 +10,12 @@ if TYPE_CHECKING:
 __all__ = ["create_mcp_server", "main"]
 
 
-def create_mcp_server(name: str = "funcpie-physics") -> FastMCP:
+def create_mcp_server(name: str = "funcpie-physics", legacy_tools: bool = False) -> FastMCP:
     """Create and configure the FuncPie FastMCP server instance.
 
     Args:
         name: Name identifier for the server.
+        legacy_tools: If True, also register individual legacy physics tools.
 
     Returns:
         FastMCP server instance.
@@ -24,7 +25,7 @@ def create_mcp_server(name: str = "funcpie-physics") -> FastMCP:
     """
     from funcpie.mcp.server import create_mcp_server as _create_server
 
-    return _create_server(name=name)
+    return _create_server(name=name, legacy_tools=legacy_tools)
 
 
 def main() -> None:

@@ -24,7 +24,7 @@ class TestMCPServer(unittest.TestCase):
     def setUpClass(cls) -> None:
         if not HAS_FASTMCP:
             return
-        cls.server = create_mcp_server("test-physics-mcp")
+        cls.server = create_mcp_server("test-physics-mcp", legacy_tools=True)
 
     async def call_tool_float(
         self,
