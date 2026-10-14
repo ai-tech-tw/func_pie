@@ -249,9 +249,13 @@ class TestMCPServer(unittest.TestCase):
         self.assertFalse(plain_auth.verify("wrong-key"))
 
     def test_http_api_key_middleware(self) -> None:
+        from funcpie.mcp.auth import APIKeyAuthenticator, APIKeyMiddleware, HAS_STARLETTE
+
+        if not HAS_STARLETTE:
+            self.skipTest("Starlette is not installed")
+
         from starlette.middleware import Middleware
         from starlette.testclient import TestClient
-        from funcpie.mcp.auth import APIKeyAuthenticator, APIKeyMiddleware
 
         auth = APIKeyAuthenticator("test-secret-key")
         app = self.server.http_app(middleware=[Middleware(APIKeyMiddleware, authenticator=auth)])

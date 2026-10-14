@@ -21,23 +21,22 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Set up virtualenv and install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest basedpyright
-        pip install "fastmcp>=0.1.0" "mcp>=1.0.0" || true
-        pip install -e .
+        python -m venv .venv
+        .venv/bin/python -m pip install --upgrade pip
+        .venv/bin/python -m pip install -e ".[dev,mcp]"
 
     - name: Run basedpyright Type Check
+      if: matrix.python-version == '3.13'
       run: |
-        mkdir -p .venv
-        npx --yes basedpyright
+        .venv/bin/basedpyright
 
     - name: Run Pytest
       run: |
-        pytest -v
+        .venv/bin/pytest -v
 
     - name: Run examples
       run: |
-        python examples/quickstart.py
-        python examples/physics_simulation.py
+        .venv/bin/python examples/quickstart.py
+        .venv/bin/python examples/physics_simulation.py

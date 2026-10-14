@@ -5,8 +5,19 @@ from __future__ import annotations
 import pytest
 
 from funcpie.mcp.registry import FuncPieRegistry, get_registry
-from funcpie.mcp.server import create_mcp_server
-from funcpie.mcp.tools_runner import execute_funcpie
+
+try:
+    import celpy
+    HAS_CEL = True
+except ImportError:
+    HAS_CEL = False
+
+try:
+    from funcpie.mcp.server import get_fastmcp_class
+    get_fastmcp_class()
+    HAS_FASTMCP = True
+except ImportError:
+    HAS_FASTMCP = False
 
 
 def test_registry_initialization():
@@ -61,6 +72,7 @@ def test_registry_describe():
     assert reg.describe("non_existent_symbol_xyz") is None
 
 
+@pytest.mark.skipif(not HAS_CEL, reason="cel-python is not installed")
 def test_execute_cel_arithmetic():
     """Verify CEL arithmetic and nested functions via evaluate_cel."""
     from funcpie.mcp.cel_engine import evaluate_cel
@@ -72,6 +84,7 @@ def test_execute_cel_arithmetic():
     assert isinstance(res["execution_time_ms"], (int, float))
 
 
+@pytest.mark.skipif(not HAS_CEL, reason="cel-python is not installed")
 def test_execute_cel_chaining():
     """Verify receiver method chaining in CEL."""
     from funcpie.mcp.cel_engine import evaluate_cel
@@ -81,6 +94,7 @@ def test_execute_cel_chaining():
     assert res["result"] == 50
 
 
+@pytest.mark.skipif(not HAS_CEL, reason="cel-python is not installed")
 def test_execute_cel_physics():
     """Verify CEL physics function call and dot attribute access."""
     from funcpie.mcp.cel_engine import evaluate_cel
@@ -91,6 +105,7 @@ def test_execute_cel_physics():
     assert round(float(res["result"]), 2) == 10.20
 
 
+@pytest.mark.skipif(not HAS_CEL, reason="cel-python is not installed")
 def test_execute_cel_constants_and_variables():
     """Verify CEL evaluation with constants and custom variables."""
     from funcpie.mcp.cel_engine import evaluate_cel
@@ -104,6 +119,7 @@ def test_execute_cel_constants_and_variables():
     assert res_ke["result"] == 100.0
 
 
+@pytest.mark.skipif(not HAS_CEL, reason="cel-python is not installed")
 def test_cel_security_penetration_prevention():
     """Verify CEL completely blocks code injection and sandbox escape attempts."""
     from funcpie.mcp.cel_engine import evaluate_cel
@@ -131,9 +147,11 @@ def test_cel_security_penetration_prevention():
     assert r5["success"] is False
 
 
+@pytest.mark.skipif(not HAS_FASTMCP, reason="fastmcp is not installed")
 def test_mcp_server_runner_tools():
     """Verify create_mcp_server registers the 4 core tools and resources."""
     import asyncio
+    from funcpie.mcp.server import create_mcp_server
 
     mcp = create_mcp_server(name="test-runner-server")
     tools = asyncio.run(mcp.list_tools())
@@ -149,9 +167,11 @@ def test_mcp_server_runner_tools():
     assert "physics_projectile_motion" not in tool_names
 
 
+@pytest.mark.skipif(not HAS_FASTMCP, reason="fastmcp is not installed")
 def test_mcp_server_legacy_tools_flag():
     """Verify --legacy-tools flag registers granular tools when requested."""
     import asyncio
+    from funcpie.mcp.server import create_mcp_server
 
     mcp = create_mcp_server(name="test-legacy-server", legacy_tools=True)
     tools = asyncio.run(mcp.list_tools())

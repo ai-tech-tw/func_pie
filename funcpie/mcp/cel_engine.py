@@ -9,8 +9,15 @@ from __future__ import annotations
 import time
 from typing import Callable
 
-import celpy
-from celpy import celtypes
+try:
+    import celpy
+    from celpy import celtypes
+
+    HAS_CEL = True
+except ImportError:
+    celpy = None  # pyright: ignore[reportConstantRedefinition]
+    celtypes = None  # pyright: ignore[reportConstantRedefinition]
+    HAS_CEL = False
 
 from funcpie import math, physics
 from funcpie.physics import constants
@@ -27,14 +34,20 @@ def _wrap_return_value(val: object) -> object:
         res_dict = asdict_fn()
         if isinstance(res_dict, dict):
             d = {str(k): _wrap_return_value(v) for k, v in res_dict.items()}
-            return celtypes.MessageType(d)  # pyright: ignore[reportArgumentType]
+            if celtypes is not None:
+                return celtypes.MessageType(d)  # pyright: ignore[reportArgumentType]
+            return d
     import dataclasses
     if dataclasses.is_dataclass(val) and not isinstance(val, type):
         d = {str(k): _wrap_return_value(v) for k, v in dataclasses.asdict(val).items()}
-        return celtypes.MessageType(d)  # pyright: ignore[reportArgumentType]
+        if celtypes is not None:
+            return celtypes.MessageType(d)  # pyright: ignore[reportArgumentType]
+        return d
     if isinstance(val, dict):
         d = {str(k): _wrap_return_value(v) for k, v in val.items()}
-        return celtypes.MessageType(d)  # pyright: ignore[reportArgumentType]
+        if celtypes is not None:
+            return celtypes.MessageType(d)  # pyright: ignore[reportArgumentType]
+        return d
     if isinstance(val, (list, tuple)):
         return [_wrap_return_value(x) for x in val]
     return str(val)
@@ -47,9 +60,9 @@ def _make_safe_caller(fn: Callable[..., object]) -> Callable[..., object]:
         # Unpack arguments to python primitives
         clean_args: list[object] = []
         for a in args:
-            if isinstance(a, celtypes.DoubleType):
+            if celtypes is not None and isinstance(a, celtypes.DoubleType):
                 clean_args.append(float(a))
-            elif isinstance(a, celtypes.IntType):
+            elif celtypes is not None and isinstance(a, celtypes.IntType):
                 clean_args.append(int(a))
             elif isinstance(a, (int, float, str, bool, list, dict)):
                 clean_args.append(a)
@@ -65,6 +78,11 @@ class CELEngine:
     """Security-hardened Common Expression Language evaluation engine for FuncPie."""
 
     def __init__(self) -> None:
+        if not HAS_CEL or celpy is None:
+            raise ImportError(
+                "cel-python is required to use the CEL execution engine. "
+                "Please install it with: pip install 'funcpie[mcp]' or pip install cel-python"
+            )
         self.env = celpy.Environment()
         self.functions: dict[str, Callable[..., object]] = {}
         self.constants: dict[str, object] = {}
@@ -214,11 +232,11 @@ class CELEngine:
 
             # Convert CEL types to standard Python primitives
             final_result: object
-            if isinstance(raw_result, celtypes.MessageType):
+            if celtypes is not None and isinstance(raw_result, celtypes.MessageType):
                 final_result = dict(raw_result)
-            elif isinstance(raw_result, celtypes.DoubleType):
+            elif celtypes is not None and isinstance(raw_result, celtypes.DoubleType):
                 final_result = float(raw_result)
-            elif isinstance(raw_result, celtypes.IntType):
+            elif celtypes is not None and isinstance(raw_result, celtypes.IntType):
                 final_result = int(raw_result)
             else:
                 final_result = raw_result

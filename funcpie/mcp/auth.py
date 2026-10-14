@@ -5,25 +5,38 @@ from __future__ import annotations
 import os
 import secrets
 from typing import TYPE_CHECKING
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.requests import Request
-from starlette.responses import PlainTextResponse, Response
-from starlette.types import ASGIApp
 
 if TYPE_CHECKING:
+    from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+    from starlette.requests import Request
+    from starlette.responses import PlainTextResponse, Response
+    from starlette.types import ASGIApp
     from argon2 import PasswordHasher
-
-try:
-    from argon2 import PasswordHasher as _PasswordHasher
-    from argon2.exceptions import VerificationError as _VerificationError
-    from argon2.exceptions import VerifyMismatchError as _VerifyMismatchError
-
-    HAS_ARGON2 = True
-except ImportError:
-    _PasswordHasher = None
+    _PasswordHasher = PasswordHasher
     _VerificationError = Exception
     _VerifyMismatchError = Exception
-    HAS_ARGON2 = False
+    HAS_STARLETTE = True
+    HAS_ARGON2 = True
+else:
+    try:
+        from starlette.middleware.base import BaseHTTPMiddleware
+        HAS_STARLETTE = True
+    except ImportError:
+        class BaseHTTPMiddleware:
+            def __init__(self, app: object) -> None:
+                self.app = app
+        HAS_STARLETTE = False
+
+    try:
+        from argon2 import PasswordHasher as _PasswordHasher
+        from argon2.exceptions import VerificationError as _VerificationError
+        from argon2.exceptions import VerifyMismatchError as _VerifyMismatchError
+        HAS_ARGON2 = True
+    except ImportError:
+        _PasswordHasher = None
+        _VerificationError = Exception
+        _VerifyMismatchError = Exception
+        HAS_ARGON2 = False
 
 
 class APIKeyAuthenticator:
@@ -74,15 +87,18 @@ class APIKeyAuthenticator:
         # Plain key constant-time comparison
         return secrets.compare_digest(candidate_key, self.target_hash)
 
-    def extract_key(self, request: Request) -> str | None:
+    def extract_key(self, request: object) -> str | None:
         """Extract API key from HTTP request headers (X-API-Key or Authorization: Bearer)."""
-        key = request.headers.get("x-api-key") or request.headers.get("X-API-Key")
+        headers = getattr(request, "headers", None)
+        if headers is None:
+            return None
+        key = headers.get("x-api-key") or headers.get("X-API-Key")
         if key:
-            return key.strip()
+            return str(key).strip()
 
-        auth_header = request.headers.get("authorization")
+        auth_header = headers.get("authorization")
         if auth_header:
-            parts = auth_header.strip().split()
+            parts = str(auth_header).strip().split()
             if len(parts) == 2 and parts[0].lower() == "bearer":
                 return parts[1].strip()
 
@@ -93,7 +109,12 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
     """Starlette middleware intercepting HTTP requests to enforce Argon2/API Key authentication."""
 
     def __init__(self, app: ASGIApp, authenticator: APIKeyAuthenticator) -> None:
-        super().__init__(app)
+        if not HAS_STARLETTE:
+            raise ImportError(
+                "Starlette is required for APIKeyMiddleware. "
+                "Please install it with: pip install 'funcpie[mcp]'"
+            )
+        super().__init__(app)  # pyright: ignore[reportUnknownMemberType]
         self.authenticator = authenticator
 
     async def dispatch(
@@ -104,6 +125,7 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
 
         key = self.authenticator.extract_key(request)
         if not key or not self.authenticator.verify(key):
+            from starlette.responses import PlainTextResponse
             return PlainTextResponse("unauthorized", status_code=401)
 
         return await call_next(request)
