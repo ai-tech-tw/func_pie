@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 import funcpie
 from funcpie import backend, core, math, physics
+from funcpie.mcp.cel_engine import evaluate_cel
 from funcpie.mcp.registry import get_registry
 from funcpie.physics import constants
 
@@ -185,30 +186,32 @@ def register_runner_tools(mcp: FastMCP) -> None:
         return item
 
     @mcp.tool()
-    def funcpie_execute(code: str, use_gpu: bool = False) -> dict[str, object]:
-        """Execute arbitrary FuncPie math and physics expressions or scripts.
+    def funcpie_execute(
+        expression: str = "",
+        code: str = "",
+        variables: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        """Safely evaluate mathematical and physical calculations using Google CEL (Common Expression Language).
 
-        Available in environment:
-            - fp / funcpie: Entire library
-            - Calculation: Fluent arithmetic engine
-            - pipe, compose, curry: Functional pipeline utilities
-            - math, physics, constants, backend
-            - add, sub, mul, div, power, clamp, Vector2D, Vector3D, Matrix, Polynomial
+        Immune to arbitrary code injection and non-Turing complete. Supports arithmetic,
+        chaining, physics formulas, physical constants, and custom variable bindings.
 
-        Examples:
-            - Single expression: "Calculation(10).add(5).mul(2).value" -> 30.0
-            - Functional pipeline: "pipe(10, lambda x: add(x, 5), lambda x: mul(x, 2))" -> 30
-            - Physics computation: "physics.mechanics.projectile_motion(v0=20, angle_deg=45)"
-            - Multi-line script: Assign 'result = ...' or leave the final line as an expression.
+        Available functions:
+            - Arithmetic: add(a, b), sub(a, b), mul(a, b), div(a, b), power(a, b), clamp(x, min, max), etc.
+            - Chaining: (10).add(5).mul(2) -> 30
+            - Physics: projectile_motion(20.0, 45.0).max_height, kinetic_energy(m, v), etc.
+            - Constants: SPEED_OF_LIGHT, PLANCK_CONSTANT, GRAVITATIONAL_CONSTANT, etc.
 
         Args:
-            code: Python code string using FuncPie.
-            use_gpu: If True, attempts to use HIP GPU backend for execution.
+            expression: CEL calculation expression (e.g., 'add(10, 20) * 2', 'projectile_motion(20.0, 45.0).max_height').
+            code: Alternative parameter alias for expression.
+            variables: Optional variables dictionary (e.g., {"m": 2.5, "v": 10.0}).
 
         Returns:
-            Dictionary containing success, result, result_type, stdout, backend, execution_time_ms.
+            Dictionary containing success, result, result_type, engine, execution_time_ms.
         """
-        return execute_funcpie(code=code, use_gpu=use_gpu)
+        expr = expression if expression else code
+        return evaluate_cel(expression=expr, variables=variables)
 
     # Register resources
     @mcp.resource("funcpie://catalog")
