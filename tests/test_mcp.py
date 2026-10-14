@@ -224,6 +224,56 @@ class TestMCPServer(unittest.TestCase):
 
         asyncio.run(_test())
 
+    def test_argon2_authenticator(self) -> None:
+        import os
+        from funcpie.mcp.auth import APIKeyAuthenticator, HAS_ARGON2
+
+        if HAS_ARGON2:
+            from argon2 import PasswordHasher
+            ph = PasswordHasher()
+            argon_hash = ph.hash("gpu-secret-pass")
+
+            auth = APIKeyAuthenticator(argon_hash)
+            self.assertTrue(auth.verify("gpu-secret-pass"))
+            self.assertFalse(auth.verify("wrong-password"))
+
+            # Test ${VAR} syntax
+            os.environ["MCP_TEST_KEY_ENV"] = argon_hash
+            auth_env = APIKeyAuthenticator("${MCP_TEST_KEY_ENV}")
+            self.assertTrue(auth_env.verify("gpu-secret-pass"))
+            self.assertFalse(auth_env.verify("wrong-password"))
+
+        # Plain key fallback
+        plain_auth = APIKeyAuthenticator("plain-secret")
+        self.assertTrue(plain_auth.verify("plain-secret"))
+        self.assertFalse(plain_auth.verify("wrong-key"))
+
+    def test_http_api_key_middleware(self) -> None:
+        from starlette.middleware import Middleware
+        from starlette.testclient import TestClient
+        from funcpie.mcp.auth import APIKeyAuthenticator, APIKeyMiddleware
+
+        auth = APIKeyAuthenticator("test-secret-key")
+        app = self.server.http_app(middleware=[Middleware(APIKeyMiddleware, authenticator=auth)])
+        client = TestClient(app)
+
+        # 1. No auth -> 401
+        r1 = client.get("/")
+        self.assertEqual(r1.status_code, 401)
+        self.assertEqual(r1.text, "unauthorized")
+
+        # 2. Wrong key -> 401
+        r2 = client.get("/", headers={"x-api-key": "invalid"})
+        self.assertEqual(r2.status_code, 401)
+
+        # 3. Correct x-api-key -> not 401
+        r3 = client.get("/", headers={"x-api-key": "test-secret-key"})
+        self.assertNotEqual(r3.status_code, 401)
+
+        # 4. Correct Authorization: Bearer -> not 401
+        r4 = client.get("/", headers={"Authorization": "Bearer test-secret-key"})
+        self.assertNotEqual(r4.status_code, 401)
+
 
 if __name__ == "__main__":
     unittest.main()

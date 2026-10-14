@@ -5,3 +5,4 @@ build>=0.10.0
 twine>=4.0.0
 fastmcp>=0.1.0
 mcp>=1.0.0
+argon2-cffi>=23.1.0

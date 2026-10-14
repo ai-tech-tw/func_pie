@@ -1,11 +1,13 @@
-"""FastMCP server factory and CLI runner for FuncPie."""
+"""FastMCP server factory and CLI runner for FuncPie with HTTP and Argon2/API Key support."""
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from typing import TYPE_CHECKING
 
+from funcpie.mcp.auth import APIKeyAuthenticator, APIKeyMiddleware
 from funcpie.mcp.tools_physics import register_physics_tools
 
 if TYPE_CHECKING:
@@ -50,7 +52,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--transport",
-        choices=["stdio", "sse"],
+        choices=["stdio", "sse", "http", "streamable-http"],
         default="stdio",
         help="Transport protocol to use (default: stdio)",
     )
@@ -59,11 +61,57 @@ def main() -> None:
         default="funcpie-physics",
         help="Server name identifier (default: funcpie-physics)",
     )
+    parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Host address to bind HTTP/SSE server (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="Port number to bind HTTP/SSE server (default: 8080)",
+    )
+    parser.add_argument(
+        "--api-key",
+        default=None,
+        help="Argon2 hash or plain API Key for authentication (supports ${ENV_VAR} format)",
+    )
+    parser.add_argument(
+        "--api-key-env",
+        default="FUNCPie_API_KEY",
+        help="Environment variable name to read API Key / Argon2 hash from (default: FUNCPie_API_KEY)",
+    )
     args = parser.parse_args()
 
     mcp = create_mcp_server(name=args.name)
+
     try:
-        mcp.run(transport=args.transport)
+        if args.transport == "stdio":
+            mcp.run(transport="stdio")
+        else:
+            # Determine API key / Argon2 hash from CLI or environment variable
+            raw_key: str | None = args.api_key
+            if not raw_key:
+                raw_key = os.getenv(args.api_key_env) or os.getenv("FUNCPie_API_KEY") or os.getenv("MCP_API_KEY")
+
+            if raw_key:
+                from starlette.middleware import Middleware
+
+                authenticator = APIKeyAuthenticator(raw_hash_or_key=raw_key)
+                middleware = [Middleware(APIKeyMiddleware, authenticator=authenticator)]
+                mcp.run(
+                    transport=args.transport,
+                    host=args.host,
+                    port=args.port,
+                    middleware=middleware,
+                )
+            else:
+                mcp.run(
+                    transport=args.transport,
+                    host=args.host,
+                    port=args.port,
+                )
     except KeyboardInterrupt:
         sys.exit(0)
 

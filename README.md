@@ -252,11 +252,33 @@ Configure your client (such as `claude_desktop_config.json`) to invoke `uvx`, au
 }
 ```
 
-Or install locally in your Python environment:
+### Remote GPU Compute Server Mode (HTTP / SSE with Argon2 Auth)
+When your GPU-accelerated node and AI Bot reside on different physical machines, run the MCP server over HTTP/SSE protected by API Key / Argon2 authentication (matching `aurora-mcp` with `${ENV_VAR}` syntax support):
+
 ```bash
-pip install -e ".[mcp]"
-funcpie-mcp
+# Launch on the GPU compute host (supports Argon2 hash or plain API key)
+funcpie-mcp --transport sse --host 0.0.0.0 --port 8080 --api-key "$argon2id$v=19$..."
+
+# Or specify via environment variable
+export FUNCPie_API_KEY="my-secret-key"
+funcpie-mcp --transport sse --host 0.0.0.0 --port 8080
 ```
+
+Remote AI Bot Client Configuration (Claude Desktop, Cursor, Antigravity):
+```json
+{
+  "mcpServers": {
+    "funcpie-physics": {
+      "serverUrl": "http://gpu-host.internal:8080/sse",
+      "headers": {
+        "x-api-key": "my-secret-key"
+      }
+    }
+  }
+}
+```
+*(Also supports `Authorization: Bearer <key>` header)*
+
 Exposes 30+ precision physical tools, CODATA physical constants resource (`physics://constants`), and a physics problem solving prompt template (`physics_problem_solver`).
 
 ---

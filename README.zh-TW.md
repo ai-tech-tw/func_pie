@@ -251,11 +251,33 @@ uvx --from "git+https://github.com/ai-tech-tw/func_pie[mcp]" funcpie-mcp
 }
 ```
 
-亦支援傳統本機預先安裝執行：
+### 遠端 GPU 運算伺服器模式 (HTTP / SSE 傳輸與 Argon2 認證)
+當 GPU 加速節點與 AI Bot 位於不同實體機器時，可在 GPU 主機啟動 HTTP / SSE 服務並啟用金鑰安全認證（對標 `aurora-mcp` 架構，支援 Argon2 雜湊比對與 `${ENV_VAR}` 語法）：
+
 ```bash
-pip install -e ".[mcp]"
-funcpie-mcp
+# 在 GPU 運算節點啟動 (支援 Argon2 Hash 或純文字 API Key)
+funcpie-mcp --transport sse --host 0.0.0.0 --port 8080 --api-key "$argon2id$v=19$..."
+
+# 亦可讀取環境變數
+export FUNCPie_API_KEY="my-secret-key"
+funcpie-mcp --transport sse --host 0.0.0.0 --port 8080
 ```
+
+遠端 AI Bot 用戶端（Claude Desktop / Cursor / Antigravity）設定：
+```json
+{
+  "mcpServers": {
+    "funcpie-physics": {
+      "serverUrl": "http://gpu-host.internal:8080/sse",
+      "headers": {
+        "x-api-key": "my-secret-key"
+      }
+    }
+  }
+}
+```
+*(亦支援 `Authorization: Bearer <key>` 標頭)*
+
 具備 30+ 項物理計算 Tools、物理常數 Resource (`physics://constants`) 以及物理題目求解 Prompt 範本 (`physics_problem_solver`)。
 
 ---
