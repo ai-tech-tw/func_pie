@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
+import glob
 import os
-from typing import Dict, List, Optional, Tuple
+import shutil
+from typing import Dict, List, Optional, Tuple, Set
 
 from funcpie.backend.cpu import CPUBackend
 
@@ -52,33 +54,84 @@ class HIPBackend:
         self._total_memory_bytes: int = 0
         self._initialize()
 
-    def _initialize(self) -> None:
-        """Search and load AMD HIP dynamic library."""
-        candidate_paths: List[str] = [
-            "libamdhip64.so",
-            "/opt/rocm/lib/libamdhip64.so",
-            "/opt/rocm/hip/lib/libamdhip64.so",
-            "/opt/rocm-6.1.2/lib/libamdhip64.so",
-            "/usr/local/lib/ollama/rocm_v7_2/libamdhip64.so.7",
-            "/usr/lib/x86_64-linux-gnu/libamdhip64.so",
-            "/usr/local/cuda/lib64/libcudart.so",  # HIP compatibility with CUDA runtime
+    @staticmethod
+    def _find_candidate_libraries() -> List[str]:
+        """Dynamically discover AMD HIP (and CUDA runtime fallback) libraries across system locations."""
+        candidates: List[str] = []
+        seen: Set[str] = set()
+
+        def _add(path: Optional[str]) -> None:
+            if path and path not in seen:
+                seen.add(path)
+                candidates.append(path)
+
+        # 1. System dynamic linker via ctypes.util.find_library
+        for lib_name in ["amdhip64", "hip64", "cudart"]:
+            found = ctypes.util.find_library(lib_name)
+            if found:
+                _add(found)
+
+        # Standard sonames for direct dlopen
+        for soname in ["libamdhip64.so", "libamdhip64.so.6", "libamdhip64.so.5", "libcudart.so"]:
+            _add(soname)
+
+        # 2. Environment variables: ROCM_PATH, ROCM_HOME, HIP_PATH, CUDA_PATH, CUDA_HOME
+        for env_var in ["ROCM_PATH", "ROCM_HOME", "HIP_PATH", "CUDA_PATH", "CUDA_HOME"]:
+            val = os.environ.get(env_var)
+            if val and os.path.isdir(val):
+                for sub in ["lib", "lib64", "hip/lib"]:
+                    lib_dir = os.path.join(val, sub)
+                    if os.path.isdir(lib_dir):
+                        for file in glob.glob(os.path.join(lib_dir, "libamdhip64.so*")):
+                            _add(file)
+                        for file in glob.glob(os.path.join(lib_dir, "libcudart.so*")):
+                            _add(file)
+
+        # 3. LD_LIBRARY_PATH inspection
+        ld_path = os.environ.get("LD_LIBRARY_PATH")
+        if ld_path:
+            for p in ld_path.split(":"):
+                if p and os.path.isdir(p):
+                    for file in glob.glob(os.path.join(p, "libamdhip64.so*")):
+                        _add(file)
+                    for file in glob.glob(os.path.join(p, "libcudart.so*")):
+                        _add(file)
+
+        # 4. Binary location heuristics (hipcc, rocminfo, rocm-smi)
+        for bin_name in ["hipcc", "rocminfo", "rocm-smi"]:
+            bin_path = shutil.which(bin_name)
+            if bin_path:
+                prefix = os.path.dirname(os.path.dirname(os.path.realpath(bin_path)))
+                for sub in ["lib", "lib64", "hip/lib"]:
+                    lib_dir = os.path.join(prefix, sub)
+                    if os.path.isdir(lib_dir):
+                        for file in glob.glob(os.path.join(lib_dir, "libamdhip64.so*")):
+                            _add(file)
+
+        # 5. Dynamic filesystem globbing in standard multi-arch & vendor prefixes (version-agnostic)
+        search_patterns = [
+            "/opt/rocm*/lib*/libamdhip64.so*",
+            "/opt/rocm*/hip/lib/libamdhip64.so*",
+            "/usr/lib*/libamdhip64.so*",
+            "/usr/lib/*-linux-*/libamdhip64.so*",
+            "/usr/local/lib*/**/libamdhip64.so*",
+            "/usr/local/cuda*/lib64/libcudart.so*",
+            "/usr/lib/*-linux-*/libcudart.so*",
         ]
+        for pattern in search_patterns:
+            try:
+                for match in sorted(glob.glob(pattern, recursive=True), reverse=True):
+                    _add(match)
+            except Exception:
+                pass
 
-        # Prioritize explicit environment variables
-        rocm_env = os.environ.get("ROCM_PATH")
-        if rocm_env:
-            candidate_paths.insert(0, os.path.join(rocm_env, "lib", "libamdhip64.so"))
-            candidate_paths.insert(1, os.path.join(rocm_env, "libamdhip64.so"))
-        hip_env = os.environ.get("HIP_PATH")
-        if hip_env:
-            candidate_paths.insert(0, os.path.join(hip_env, "lib", "libamdhip64.so"))
+        return candidates
 
-        # Check find_library
-        found_lib = ctypes.util.find_library("amdhip64")
-        if found_lib:
-            candidate_paths.insert(0, found_lib)
-
+    def _initialize(self) -> None:
+        """Search and load AMD HIP dynamic library dynamically."""
+        candidate_paths = self._find_candidate_libraries()
         lib_handle: Optional[ctypes.CDLL] = None
+
         for path in candidate_paths:
             if os.path.exists(path) or not os.path.isabs(path):
                 try:
