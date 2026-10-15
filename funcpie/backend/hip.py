@@ -7,6 +7,7 @@ import ctypes.util
 import glob
 import os
 import shutil
+import subprocess
 from typing import Dict, List, Optional, Tuple, Set
 
 from funcpie.backend.cpu import CPUBackend
@@ -48,6 +49,8 @@ class HIPBackend:
 
     def __init__(self) -> None:
         self._hip_lib: Optional[ctypes.CDLL] = None
+        self._native_lib: Optional[ctypes.CDLL] = None
+        self._native_lib_attempted: bool = False
         self._is_available: Optional[bool] = None
         self._device_count: int = 0
         self._device_name: str = "Unavailable"
@@ -179,6 +182,113 @@ class HIPBackend:
 
         self._is_available = False
 
+    def _setup_native_signatures(self, lib: ctypes.CDLL) -> None:
+        """Configure ctypes function prototypes for the native HIP library."""
+        if hasattr(lib, "hip_collatz_batch"):
+            lib.hip_collatz_batch.argtypes = [
+                ctypes.c_ulonglong,
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.POINTER(ctypes.c_int),
+                ctypes.POINTER(ctypes.c_ulonglong),
+            ]
+            lib.hip_collatz_batch.restype = ctypes.c_int
+
+        if hasattr(lib, "hip_elliptic_ap_batch"):
+            lib.hip_elliptic_ap_batch.argtypes = [
+                ctypes.c_longlong,
+                ctypes.c_longlong,
+                ctypes.POINTER(ctypes.c_longlong),
+                ctypes.POINTER(ctypes.c_int),
+                ctypes.c_int,
+            ]
+            lib.hip_elliptic_ap_batch.restype = ctypes.c_int
+
+        if hasattr(lib, "hip_matmul"):
+            lib.hip_matmul.argtypes = [
+                ctypes.POINTER(ctypes.c_float),
+                ctypes.POINTER(ctypes.c_float),
+                ctypes.POINTER(ctypes.c_float),
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.c_int,
+            ]
+            lib.hip_matmul.restype = ctypes.c_int
+
+    def _get_native_lib(self) -> Optional[ctypes.CDLL]:
+        """Load or JIT-compile native HIP C++ kernels library."""
+        if self._native_lib is not None:
+            return self._native_lib
+        if self._native_lib_attempted:
+            return None
+
+        self._native_lib_attempted = True
+        if not self.is_available():
+            return None
+
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        cache_dir = os.path.expanduser("~/.cache/funcpie")
+        candidates = [
+            os.path.join(curr_dir, "libfuncpie_hip_native.so"),
+            os.path.join(cache_dir, "libfuncpie_hip_native.so"),
+            "/tmp/libfuncpie_hip_native.so",
+        ]
+
+        for cand in candidates:
+            if os.path.isfile(cand):
+                try:
+                    lib = ctypes.CDLL(cand)
+                    self._setup_native_signatures(lib)
+                    self._native_lib = lib
+                    return lib
+                except Exception:
+                    continue
+
+        # Try JIT compiling via hipcc if source is present
+        cpp_src = os.path.join(curr_dir, "hip_kernels.cpp")
+        if not os.path.isfile(cpp_src):
+            return None
+
+        hipcc_bin = shutil.which("hipcc")
+        if not hipcc_bin:
+            rocm_path = os.environ.get("ROCM_PATH", "/opt/rocm")
+            cand_hipcc = os.path.join(rocm_path, "bin", "hipcc")
+            if os.path.isfile(cand_hipcc) and os.access(cand_hipcc, os.X_OK):
+                hipcc_bin = cand_hipcc
+
+        if not hipcc_bin:
+            return None
+
+        target_so: str = "/tmp/libfuncpie_hip_native.so"
+        try:
+            os.makedirs(cache_dir, exist_ok=True)
+            target_so = os.path.join(cache_dir, "libfuncpie_hip_native.so")
+        except Exception:
+            pass
+
+        cmd = [
+            hipcc_bin,
+            "-O3",
+            "-fPIC",
+            "-shared",
+            "--offload-arch=native",
+            "-o",
+            target_so,
+            cpp_src,
+        ]
+
+        try:
+            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60, check=False)
+            if res.returncode == 0 and os.path.isfile(target_so):
+                lib = ctypes.CDLL(target_so)
+                self._setup_native_signatures(lib)
+                self._native_lib = lib
+                return lib
+        except Exception:
+            pass
+
+        return None
+
     def is_available(self) -> bool:
         """Return True if AMD HIP runtime and compatible device are ready."""
         return bool(self._is_available)
@@ -206,6 +316,32 @@ class HIPBackend:
 
         if cols_a != rows_b:
             raise ValueError(f"Cannot multiply matrix with shapes ({rows_a}, {cols_a}) and ({rows_b}, {cols_b})")
+
+        if rows_a == 0 or cols_a == 0 or cols_b == 0:
+            return []
+
+        native_lib = self._get_native_lib()
+        if native_lib is not None and hasattr(native_lib, "hip_matmul"):
+            try:
+                flat_a = (ctypes.c_float * (rows_a * cols_a))(*[elem for row in a for elem in row])
+                flat_b = (ctypes.c_float * (rows_b * cols_b))(*[elem for row in b for elem in row])
+                flat_c = (ctypes.c_float * (rows_a * cols_b))()
+
+                ret = native_lib.hip_matmul(
+                    flat_a,
+                    flat_b,
+                    flat_c,
+                    ctypes.c_int(rows_a),
+                    ctypes.c_int(cols_b),
+                    ctypes.c_int(cols_a),
+                )
+                if ret == 0:
+                    result: List[List[float]] = []
+                    for i in range(rows_a):
+                        result.append([float(flat_c[i * cols_b + j]) for j in range(cols_b)])
+                    return result
+            except Exception:
+                pass
 
         return CPUBackend.matmul(a, b)
 
@@ -240,8 +376,29 @@ class HIPBackend:
 
     def collatz_batch(self, start: int, count: int, max_steps: int = 100000) -> List[Tuple[int, int, int]]:
         """Compute Collatz stopping times and peak values accelerated by HIP."""
-        if not self.is_available():
+        if not self.is_available() or count <= 0:
             return CPUBackend.collatz_batch(start, count, max_steps)
+
+        native_lib = self._get_native_lib()
+        if native_lib is not None and hasattr(native_lib, "hip_collatz_batch"):
+            try:
+                out_steps = (ctypes.c_int * count)()
+                out_peaks = (ctypes.c_ulonglong * count)()
+                ret = native_lib.hip_collatz_batch(
+                    ctypes.c_ulonglong(start),
+                    ctypes.c_int(count),
+                    ctypes.c_int(max_steps),
+                    out_steps,
+                    out_peaks,
+                )
+                if ret == 0:
+                    return [
+                        (start + i, int(out_steps[i]), int(out_peaks[i]))
+                        for i in range(count)
+                    ]
+            except Exception:
+                pass
+
         return CPUBackend.collatz_batch(start, count, max_steps)
 
     def goldbach_batch(self, start_even: int, count: int) -> List[Tuple[int, int, int]]:
@@ -380,6 +537,27 @@ class HIPBackend:
 
     def elliptic_ap_batch(self, a: int, b: int, primes: List[int]) -> List[int]:
         """Compute trace of Frobenius a_p for elliptic curves."""
+        if not self.is_available() or not primes:
+            return CPUBackend.elliptic_ap_batch(a, b, primes)
+
+        native_lib = self._get_native_lib()
+        if native_lib is not None and hasattr(native_lib, "hip_elliptic_ap_batch"):
+            try:
+                num_primes = len(primes)
+                primes_arr = (ctypes.c_longlong * num_primes)(*primes)
+                out_ap = (ctypes.c_int * num_primes)()
+                ret = native_lib.hip_elliptic_ap_batch(
+                    ctypes.c_longlong(a),
+                    ctypes.c_longlong(b),
+                    primes_arr,
+                    out_ap,
+                    ctypes.c_int(num_primes),
+                )
+                if ret == 0:
+                    return [int(out_ap[i]) for i in range(num_primes)]
+            except Exception:
+                pass
+
         return CPUBackend.elliptic_ap_batch(a, b, primes)
 
     def ramanujan_tau_batch(self, limit: int) -> List[int]:

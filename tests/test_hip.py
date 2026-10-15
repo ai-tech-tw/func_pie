@@ -68,6 +68,15 @@ class TestHIPBackend(unittest.TestCase):
         batch_proj = hip.batch_projectile([50.0], [45.0])
         self.assertEqual(len(batch_proj), 1)
 
+        # Collatz batch
+        collatz_res = hip.collatz_batch(start=1, count=5)
+        self.assertEqual(len(collatz_res), 5)
+        self.assertEqual(collatz_res[0], (1, 0, 1))
+
+        # Elliptic a_p batch
+        ap_res = hip.elliptic_ap_batch(0, -432, [5, 7, 11])
+        self.assertEqual(len(ap_res), 3)
+
     def test_matrix_and_calculus_integration(self) -> None:
         # Matrix using backend
         m1 = Matrix([[1.0, 2.0], [3.0, 4.0]])
