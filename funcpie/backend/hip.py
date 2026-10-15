@@ -49,6 +49,7 @@ class HIPBackend:
         self._is_available: Optional[bool] = None
         self._device_count: int = 0
         self._device_name: str = "Unavailable"
+        self._total_memory_bytes: int = 0
         self._initialize()
 
     def _initialize(self) -> None:
@@ -57,9 +58,20 @@ class HIPBackend:
             "libamdhip64.so",
             "/opt/rocm/lib/libamdhip64.so",
             "/opt/rocm/hip/lib/libamdhip64.so",
+            "/opt/rocm-6.1.2/lib/libamdhip64.so",
+            "/usr/local/lib/ollama/rocm_v7_2/libamdhip64.so.7",
             "/usr/lib/x86_64-linux-gnu/libamdhip64.so",
             "/usr/local/cuda/lib64/libcudart.so",  # HIP compatibility with CUDA runtime
         ]
+
+        # Prioritize explicit environment variables
+        rocm_env = os.environ.get("ROCM_PATH")
+        if rocm_env:
+            candidate_paths.insert(0, os.path.join(rocm_env, "lib", "libamdhip64.so"))
+            candidate_paths.insert(1, os.path.join(rocm_env, "libamdhip64.so"))
+        hip_env = os.environ.get("HIP_PATH")
+        if hip_env:
+            candidate_paths.insert(0, os.path.join(hip_env, "lib", "libamdhip64.so"))
 
         # Check find_library
         found_lib = ctypes.util.find_library("amdhip64")
@@ -91,13 +103,23 @@ class HIPBackend:
                 if status == HIP_SUCCESS and device_count.value > 0:
                     self._device_count = device_count.value
                     self._is_available = True
-                    # Query first device
-                    prop = HipDeviceProp()
-                    if hasattr(self._hip_lib, "hipGetDeviceProperties"):
-                        self._hip_lib.hipGetDeviceProperties.argtypes = [ctypes.POINTER(HipDeviceProp), ctypes.c_int]
-                        self._hip_lib.hipGetDeviceProperties.restype = ctypes.c_int
-                        if self._hip_lib.hipGetDeviceProperties(ctypes.byref(prop), 0) == HIP_SUCCESS:
-                            self._device_name = prop.name.decode("utf-8", errors="ignore")
+
+                    # Query primary device name safely via hipDeviceGetName
+                    if hasattr(self._hip_lib, "hipDeviceGetName"):
+                        name_buf = ctypes.create_string_buffer(256)
+                        self._hip_lib.hipDeviceGetName.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+                        self._hip_lib.hipDeviceGetName.restype = ctypes.c_int
+                        if self._hip_lib.hipDeviceGetName(name_buf, 256, 0) == HIP_SUCCESS:
+                            self._device_name = name_buf.value.decode("utf-8", errors="ignore").strip()
+
+                    # Query VRAM safely via hipMemGetInfo
+                    if hasattr(self._hip_lib, "hipMemGetInfo"):
+                        free_mem = ctypes.c_size_t(0)
+                        total_mem = ctypes.c_size_t(0)
+                        self._hip_lib.hipMemGetInfo.argtypes = [ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t)]
+                        self._hip_lib.hipMemGetInfo.restype = ctypes.c_int
+                        if self._hip_lib.hipMemGetInfo(ctypes.byref(free_mem), ctypes.byref(total_mem)) == HIP_SUCCESS:
+                            self._total_memory_bytes = total_mem.value
                     return
         except Exception:
             pass
@@ -114,6 +136,7 @@ class HIPBackend:
             "available": self.is_available(),
             "device_count": self._device_count,
             "device_name": self._device_name,
+            "total_memory_bytes": self._total_memory_bytes,
             "backend": "hip" if self.is_available() else "cpu_fallback",
         }
 
