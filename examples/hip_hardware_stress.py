@@ -20,7 +20,9 @@ def main() -> None:
     print(f"[*] Backend Available : {info['available']}")
     print(f"[*] Device Name       : {info['device_name']}")
     print(f"[*] Device Count      : {info['device_count']}")
-    total_gb = (info['total_memory_bytes'] or 0) / (1024**3)
+    raw_mem = info.get("total_memory_bytes")
+    total_bytes = int(raw_mem) if isinstance(raw_mem, (int, float)) else 0
+    total_gb = total_bytes / (1024**3)
     print(f"[*] VRAM Size         : {total_gb:.2f} GB")
     print("-" * 60)
 
